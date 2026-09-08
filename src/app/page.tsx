@@ -64,6 +64,15 @@ export default function HomePage() {
               LinkedIn
             </a>
           </li>
+          <li>
+            <a
+              href="https://github.com/SravanV12/sravan-portfolio-2026"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Source on GitHub
+            </a>
+          </li>
         </ul>
       </Container>
     </main>

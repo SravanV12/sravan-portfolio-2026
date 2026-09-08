@@ -6,6 +6,8 @@ desktop.
 Built with Next.js (App Router), TypeScript and Tailwind. Content is managed
 in a CMS and fetched at build time, so every page ships as static HTML.
 
+Repository: https://github.com/SravanV12/sravan-portfolio-2026
+
 ## Getting started
 
 ```bash
