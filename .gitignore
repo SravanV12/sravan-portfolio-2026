@@ -33,9 +33,10 @@ yarn-error.log*
 # Local-only hook configuration, not shared
 .githooks/*.local
 
-# Env
+# Env — everything except the key template, which carries no values
 .env*
 .env*.local
+!.env.example
 
 # vercel
 .vercel

@@ -14,7 +14,8 @@ if [ -z "$staged" ]; then
 fi
 
 # --- Environment files never get committed ---------------------------------
-env_paths=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env' || true)
+# .env.example is the exception: it is the key template and holds no values.
+env_paths=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env' | grep -vE '(^|/)\.env\.example$' || true)
 if [ -n "$env_paths" ]; then
   echo "pre-commit: environment files must not be tracked:" >&2
   printf '%s\n' "$env_paths" | sed 's/^/  /' >&2

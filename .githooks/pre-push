@@ -9,7 +9,7 @@ status=0
 POLICY=".githooks/policy.local"
 
 # --- Environment files must not be tracked ---------------------------------
-env_tracked=$(git ls-files | grep -E '(^|/)\.env' || true)
+env_tracked=$(git ls-files | grep -E '(^|/)\.env' | grep -vE '(^|/)\.env\.example$' || true)
 if [ -n "$env_tracked" ]; then
   echo "pre-push: environment files are tracked in this repo:" >&2
   printf '%s\n' "$env_tracked" | sed 's/^/  /' >&2
