@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# Gate 2 of 3. Message rules live here rather than pre-commit, because at
+# pre-commit time the message does not exist yet.
+
+set -u
+
+msg_file="$1"
+status=0
+POLICY=".githooks/policy.local"
+
+# Drop comment lines and trailing blank lines, the same way git itself will.
+cleaned=$(git stripspace --strip-comments < "$msg_file")
+
+if [ -z "$cleaned" ]; then
+  exit 0  # empty message: let git abort in its own way
+fi
+
+# --- Length ----------------------------------------------------------------
+lines=$(printf '%s\n' "$cleaned" | wc -l | tr -d '[:space:]')
+if [ "$lines" -gt 5 ]; then
+  echo "commit-msg: message is $lines lines, the limit is 5." >&2
+  echo "  Describe the change, not the process." >&2
+  status=1
+fi
+
+# --- Subject length --------------------------------------------------------
+subject=$(printf '%s\n' "$cleaned" | head -n 1)
+subject_len=$(printf '%s' "$subject" | wc -c | tr -d '[:space:]')
+if [ "$subject_len" -gt 72 ]; then
+  echo "commit-msg: subject line is $subject_len characters, the limit is 72." >&2
+  echo "  $subject" >&2
+  status=1
+fi
+
+# --- Trailers --------------------------------------------------------------
+# This project's messages carry no trailers of any kind.
+trailers=$(printf '%s\n' "$cleaned" | grep -inE '^[A-Za-z-]+-[A-Za-z-]+:[[:space:]]|co-authored-by|generated with' || true)
+if [ -n "$trailers" ]; then
+  echo "commit-msg: trailers are not used in this project:" >&2
+  printf '%s\n' "$trailers" | sed 's/^/  line /' >&2
+  status=1
+fi
+
+# --- Local content policy --------------------------------------------------
+if [ -f "$POLICY" ]; then
+  . "./$POLICY"
+
+  if [ -n "${POLICY_MSG_WORDS:-}" ]; then
+    bad=$(printf '%s\n' "$cleaned" | grep -inE "$POLICY_MSG_WORDS" || true)
+    if [ -n "$bad" ]; then
+      echo "commit-msg: message breaks the local content policy:" >&2
+      printf '%s\n' "$bad" | sed 's/^/  line /' >&2
+      status=1
+    fi
+  fi
+
+  if [ -n "${POLICY_MSG_CHARS:-}" ]; then
+    if printf '%s\n' "$cleaned" | grep -qF "$POLICY_MSG_CHARS"; then
+      echo "commit-msg: message contains a character barred by the local policy." >&2
+      status=1
+    fi
+  fi
+else
+  echo "commit-msg: note — $POLICY not found, extended checks skipped." >&2
+fi
+
+exit $status

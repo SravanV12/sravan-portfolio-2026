@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/*
+  DESIGN TOKENS
+  This file is the single source of truth for colour and type.
+  Raw colour values are legal here and nowhere else in the codebase.
+  Components reference tokens only: bg-bg, text-muted, border-line, etc.
+*/
+
+@theme {
+  /* Colour — dark editorial. One accent, used sparingly. */
+  --color-bg: #0a0a0b; /* near-black page ground, deliberately not #000 */
+  --color-surface: #141416; /* slightly raised panel */
+  --color-fg: #edede9; /* off-white body text, deliberately not #fff */
+  --color-muted: #8a8a8f; /* secondary text — 5.7:1 on bg, passes AA */
+  --color-accent: #ff5c36; /* the only accent — 6.4:1 on bg */
+  --color-line: #26262a; /* hairline borders and rules */
+
+  /* Measure — the page gutter lives here so Container is the only consumer */
+  --container-page: 76rem;
+
+  /* Type scale — fluid, mobile-first. Clamped so it never runs away. */
+  --text-display: clamp(3.25rem, 1.2rem + 8.5vw, 8rem);
+  --text-display--line-height: 0.92;
+  --text-display--letter-spacing: -0.035em;
+  --text-display--font-weight: 600;
+
+  --text-h1: clamp(2.25rem, 1.4rem + 3.6vw, 4rem);
+  --text-h1--line-height: 1.02;
+  --text-h1--letter-spacing: -0.025em;
+  --text-h1--font-weight: 600;
+
+  --text-h2: clamp(1.75rem, 1.3rem + 1.9vw, 2.5rem);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h2--font-weight: 600;
+
+  --text-h3: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem);
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 500;
+
+  --text-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --text-body--line-height: 1.6;
+
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+
+  /* Eyebrows, labels, figure captions, code */
+  --text-mono: 0.8125rem;
+  --text-mono--line-height: 1.4;
+  --text-mono--letter-spacing: 0.08em;
+}
+
+/*
+  Inline so the next/font variables resolve against :root, which is the
+  same element next/font puts them on.
+*/
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  /* Visible focus everywhere, keyed to the accent. Non-negotiable. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+}

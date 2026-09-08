@@ -1,0 +1,97 @@
+#!/bin/sh
+#
+# Gate 1 of 3. Runs against staged files only.
+# If this hook blocks you, fix the cause. Never pass --no-verify.
+
+set -u
+
+status=0
+POLICY=".githooks/policy.local"
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+# --- Environment files never get committed ---------------------------------
+env_paths=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env' || true)
+if [ -n "$env_paths" ]; then
+  echo "pre-commit: environment files must not be tracked:" >&2
+  printf '%s\n' "$env_paths" | sed 's/^/  /' >&2
+  echo "  Unstage with: git restore --staged <path>" >&2
+  status=1
+fi
+
+# --- Secrets ---------------------------------------------------------------
+# Walks the staged diff so the report points at an exact file and line.
+secrets=$(git diff --cached -U0 --no-color | awk '
+  /^\+\+\+ b\// { file = substr($0, 7); next }
+  /^@@/ {
+    match($0, /\+[0-9]+/)
+    line = substr($0, RSTART + 1, RLENGTH - 1) + 0
+    next
+  }
+  /^\+/ {
+    body = substr($0, 2)
+    # Anchored to the start of a value ("x": "sk...", KEY=sk...) so base64
+    # integrity hashes containing "sk" mid-string are not false positives.
+    if (body ~ /[=:][[:space:]]*"?sk[A-Za-z0-9]{32,}/) printf "  %s:%d: looks like an API token\n", file, line
+    else if (body ~ /SANITY_API_READ_TOKEN[[:space:]]*=[[:space:]]*[^[:space:]"]+/) printf "  %s:%d: non-empty SANITY_API_READ_TOKEN\n", file, line
+    line++
+  }
+')
+if [ -n "$secrets" ]; then
+  echo "pre-commit: possible secret in staged content:" >&2
+  printf '%s\n' "$secrets" >&2
+  echo "  Secrets belong in .env.local and in the host's dashboard." >&2
+  status=1
+fi
+
+# --- Local content policy --------------------------------------------------
+# Optional, machine-local rules. Absent on a fresh clone, so say so rather
+# than degrade quietly.
+if [ -f "$POLICY" ]; then
+  . "./$POLICY"
+
+  if [ -n "${POLICY_PATHS:-}" ]; then
+    bad_paths=$(printf '%s\n' "$staged" | grep -E "$POLICY_PATHS" || true)
+    if [ -n "$bad_paths" ]; then
+      echo "pre-commit: these paths are local-only and must not be tracked:" >&2
+      printf '%s\n' "$bad_paths" | sed 's/^/  /' >&2
+      status=1
+    fi
+  fi
+
+  if [ -n "${POLICY_WORDS:-}" ]; then
+    bad_names=$(printf '%s\n' "$staged" | grep -iE "$POLICY_WORDS" || true)
+    if [ -n "$bad_names" ]; then
+      echo "pre-commit: filename breaks the local content policy:" >&2
+      printf '%s\n' "$bad_names" | sed 's/^/  /' >&2
+      status=1
+    fi
+
+    hits=$(git diff --cached -U0 --no-color | awk -v pat="$POLICY_WORDS" '
+      /^\+\+\+ b\// { file = substr($0, 7); next }
+      /^\+\+\+ /    { file = "?"; next }
+      /^@@/ {
+        match($0, /\+[0-9]+/)
+        line = substr($0, RSTART + 1, RLENGTH - 1) + 0
+        next
+      }
+      /^\+/ {
+        body = substr($0, 2)
+        if (tolower(body) ~ pat) printf "  %s:%d: %s\n", file, line, body
+        line++
+      }
+    ')
+    if [ -n "$hits" ]; then
+      echo "pre-commit: staged content breaks the local content policy:" >&2
+      printf '%s\n' "$hits" >&2
+      status=1
+    fi
+  fi
+else
+  echo "pre-commit: note — $POLICY not found, extended checks skipped." >&2
+fi
+
+exit $status

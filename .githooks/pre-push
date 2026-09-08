@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# Gate 3 of 3. The last check before anything leaves this machine.
+# Broader than pre-commit: whole tracked tree, whole outgoing history.
+
+set -u
+
+status=0
+POLICY=".githooks/policy.local"
+
+# --- Environment files must not be tracked ---------------------------------
+env_tracked=$(git ls-files | grep -E '(^|/)\.env' || true)
+if [ -n "$env_tracked" ]; then
+  echo "pre-push: environment files are tracked in this repo:" >&2
+  printf '%s\n' "$env_tracked" | sed 's/^/  /' >&2
+  echo "  Remove with: git rm --cached <path>" >&2
+  status=1
+fi
+
+# --- Range being pushed ----------------------------------------------------
+# No upstream yet on a first push, so fall back to the whole history.
+if upstream=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null); then
+  range="$upstream..HEAD"
+else
+  range="HEAD"
+fi
+msgs=$(git log --format=%B "$range" 2>/dev/null || true)
+
+# --- Local content policy --------------------------------------------------
+if [ -f "$POLICY" ]; then
+  . "./$POLICY"
+
+  if [ -n "${POLICY_PATHS:-}" ]; then
+    tracked=$(git ls-files | grep -E "$POLICY_PATHS" || true)
+    if [ -n "$tracked" ]; then
+      echo "pre-push: local-only paths are tracked in this repo:" >&2
+      printf '%s\n' "$tracked" | sed 's/^/  /' >&2
+      echo "  Remove with: git rm --cached <path>" >&2
+      status=1
+    fi
+  fi
+
+  if [ -n "${POLICY_WORDS:-}" ]; then
+    # -I skips binaries. NUL-separated names survive spaces.
+    hits=$(git ls-files -z | xargs -0 grep -inIE "$POLICY_WORDS" 2>/dev/null || true)
+    if [ -n "$hits" ]; then
+      echo "pre-push: tracked files break the local content policy:" >&2
+      printf '%s\n' "$hits" | sed 's/^/  /' >&2
+      status=1
+    fi
+
+    bad_names=$(git ls-files | grep -iE "$POLICY_WORDS" || true)
+    if [ -n "$bad_names" ]; then
+      echo "pre-push: tracked filename breaks the local content policy:" >&2
+      printf '%s\n' "$bad_names" | sed 's/^/  /' >&2
+      status=1
+    fi
+  fi
+
+  if [ -n "${POLICY_MSG_WORDS:-}" ]; then
+    bad_msgs=$(printf '%s\n' "$msgs" | grep -inE "$POLICY_MSG_WORDS" || true)
+    if [ -n "$bad_msgs" ]; then
+      echo "pre-push: outgoing commit messages break the local content policy ($range):" >&2
+      printf '%s\n' "$bad_msgs" | sed 's/^/  /' >&2
+      echo "  History has to be rewritten to fix this. Do not force past it." >&2
+      status=1
+    fi
+  fi
+
+  if [ -n "${POLICY_MSG_CHARS:-}" ]; then
+    if printf '%s\n' "$msgs" | grep -qF "$POLICY_MSG_CHARS"; then
+      echo "pre-push: outgoing commit messages contain a barred character ($range)." >&2
+      status=1
+    fi
+  fi
+else
+  echo "pre-push: note — $POLICY not found, extended checks skipped." >&2
+fi
+
+exit $status
