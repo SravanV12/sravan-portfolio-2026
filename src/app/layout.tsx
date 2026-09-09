@@ -27,6 +27,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="bg-bg text-fg font-sans text-body flex min-h-full flex-col">
+        {/* Off-screen until focused, so a keyboard user can skip straight to
+            the content instead of tabbing the whole page. */}
+        <a
+          href="#main"
+          className="text-mono bg-surface text-fg sr-only rounded px-4 py-2 uppercase focus-visible:not-sr-only focus-visible:absolute focus-visible:left-4 focus-visible:top-4 focus-visible:z-50"
+        >
+          Skip to content
+        </a>
         {children}
       </body>
     </html>

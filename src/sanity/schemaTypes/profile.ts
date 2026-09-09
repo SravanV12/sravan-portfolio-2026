@@ -23,6 +23,12 @@ export const profile = defineType({
       validation: (rule) => rule.required().max(90),
     }),
     defineField({
+      name: "location",
+      title: "Location",
+      type: "string",
+      description: "Shown above the name in the hero.",
+    }),
+    defineField({
       name: "intro",
       title: "Intro",
       type: "richText",

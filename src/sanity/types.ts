@@ -37,6 +37,7 @@ export type SkillGroup = {
 export type Profile = {
   name?: string;
   headline?: string;
+  location?: string;
   intro?: PortableTextBlock[];
   email?: string;
   linkedin?: string;
