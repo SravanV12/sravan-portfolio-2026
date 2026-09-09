@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/container";
 import { PortableText } from "@/components/portable-text";
+import { Reveal } from "@/components/reveal";
 import { sanityFetch } from "@/sanity/fetch";
 import { CASE_STUDY_QUERY, CASE_STUDY_SLUGS_QUERY } from "@/sanity/queries";
 import type { CaseStudy, CaseStudySlug } from "@/sanity/types";
@@ -47,6 +48,7 @@ export default async function CaseStudyPage({
           ← Work
         </Link>
 
+        {/* Above the fold, so not revealed — same LCP reasoning as the hero. */}
         <header className="mt-16">
           <h1 className="text-h1 max-w-[18ch] text-balance">
             {caseStudy.title}
@@ -82,7 +84,8 @@ export default async function CaseStudyPage({
             {caseStudy.sections?.length ? (
               <div>
                 {caseStudy.sections.map((section) => (
-                  <section
+                  <Reveal
+                    as="section"
                     key={section._key}
                     className="border-line mt-16 border-t pt-8 first:mt-0 first:border-t-0 first:pt-0"
                   >
@@ -92,13 +95,13 @@ export default async function CaseStudyPage({
                     <div className="mt-6 max-w-[68ch]">
                       <PortableText value={section.body} />
                     </div>
-                  </section>
+                  </Reveal>
                 ))}
               </div>
             ) : null}
 
             {caseStudy.showPlatformSection && caseStudy.platforms?.length ? (
-              <section className="border-line mt-16 border-t pt-8">
+              <Reveal as="section" className="border-line mt-16 border-t pt-8">
                 <h2 className="text-mono text-muted uppercase">Platforms</h2>
                 <div className="mt-8 grid gap-10 sm:grid-cols-2">
                   {caseStudy.platforms.map((platform) => (
@@ -110,11 +113,11 @@ export default async function CaseStudyPage({
                     </div>
                   ))}
                 </div>
-              </section>
+              </Reveal>
             ) : null}
 
             {caseStudy.diagram ? (
-              <section className="border-line mt-16 border-t pt-8">
+              <Reveal as="section" className="border-line mt-16 border-t pt-8">
                 <h2 className="text-mono text-muted uppercase">Architecture</h2>
                 <h3 className="text-h3 mt-6">{caseStudy.diagram.title}</h3>
                 {/* The animated figure is built in step 09. Until then the alt
@@ -123,7 +126,7 @@ export default async function CaseStudyPage({
                 <p className="text-body text-muted mt-4 max-w-[68ch]">
                   {caseStudy.diagram.altText}
                 </p>
-              </section>
+              </Reveal>
             ) : null}
           </div>
         </div>

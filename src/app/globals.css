@@ -77,4 +77,14 @@
     background-color: var(--color-accent);
     color: var(--color-bg);
   }
+
+  /*
+    Reveal elements start hidden ONLY when the inline script in the layout has
+    confirmed that JavaScript is running and motion is allowed. With JS off, or
+    reduced motion on, `.motion-js` is never added and everything renders as
+    authored. Never hide content on the assumption that script will show it.
+  */
+  .motion-js [data-reveal] {
+    opacity: 0;
+  }
 }

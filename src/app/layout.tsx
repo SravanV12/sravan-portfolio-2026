@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import "./globals.css";
+
+/**
+ * Runs before first paint. Marks the document only when script is running AND
+ * motion is allowed, which is what gates the reveal system's hidden state.
+ * Doing this here rather than in React avoids a frame of visible content that
+ * then disappears.
+ */
+const MOTION_FLAG = `try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("motion-js")}catch(e){}`;
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,7 +39,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: MOTION_FLAG }} />
+      </head>
       <body className="bg-bg text-fg font-sans text-body flex min-h-full flex-col">
+        <SmoothScroll />
         {/* Off-screen until focused, so a keyboard user can skip straight to
             the content instead of tabbing the whole page. */}
         <a

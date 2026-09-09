@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
 import { PortableText } from "@/components/portable-text";
+import { Reveal } from "@/components/reveal";
 import { sanityFetch } from "@/sanity/fetch";
 import { CASE_STUDIES_QUERY, PROFILE_QUERY } from "@/sanity/queries";
 import type { CaseStudyCard, Profile } from "@/sanity/types";
@@ -25,6 +26,13 @@ export default async function HomePage() {
         as="section"
         className="flex min-h-svh flex-col justify-end pb-20 pt-32 sm:pb-28"
       >
+        {/*
+          The hero is deliberately NOT revealed. It is above the fold and its
+          headline is the LCP element — hiding it until GSAP loads moved LCP
+          from 2.3s to 2.9s, past the 2.5s budget, because the first paint then
+          waits on JavaScript instead of just the webfont. Motion starts below
+          the fold, where it costs nothing.
+        */}
         {profile?.location ? (
           <p className="text-mono text-muted uppercase">{profile.location}</p>
         ) : null}
@@ -52,9 +60,12 @@ export default async function HomePage() {
 
       {/* Work index. Rows, not thumbnails — there are no screenshots. */}
       <Container as="section" id="work" className="border-line border-t py-24 sm:py-32">
-        <h2 className="text-mono text-muted uppercase">Selected work</h2>
+        <Reveal as="h2" className="text-mono text-muted uppercase">
+          Selected work
+        </Reveal>
 
-        <ul className="mt-12 sm:mt-16">
+        {/* Staggered: the rows arrive in sequence rather than as one block. */}
+        <Reveal as="ul" stagger={0.06} className="mt-12 sm:mt-16">
           {caseStudies.map((item, index) => (
             <li key={item._id} className="border-line border-b">
               <Link
@@ -89,22 +100,33 @@ export default async function HomePage() {
               </Link>
             </li>
           ))}
-        </ul>
+        </Reveal>
       </Container>
 
       {/* About. */}
       <Container as="section" id="about" className="border-line border-t py-24 sm:py-32">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
-          <h2 className="text-mono text-muted uppercase lg:col-span-3">About</h2>
+          <Reveal
+            as="h2"
+            className="text-mono text-muted uppercase lg:col-span-3"
+          >
+            About
+          </Reveal>
 
           <div className="lg:col-span-9">
-            <PortableText
-              value={profile?.intro}
-              className="text-h3 max-w-[38ch] font-normal"
-            />
+            <Reveal>
+              <PortableText
+                value={profile?.intro}
+                className="text-h3 max-w-[38ch] font-normal"
+              />
+            </Reveal>
 
             {profile?.skillGroups?.length ? (
-              <dl className="border-line mt-20 grid gap-10 border-t pt-12 sm:grid-cols-2 lg:grid-cols-3">
+              <Reveal
+                as="dl"
+                stagger={0.05}
+                className="border-line mt-20 grid gap-10 border-t pt-12 sm:grid-cols-2 lg:grid-cols-3"
+              >
                 {profile.skillGroups.map((group) => (
                   <div key={group._key}>
                     <dt className="text-mono text-muted uppercase">
@@ -115,7 +137,7 @@ export default async function HomePage() {
                     </dd>
                   </div>
                 ))}
-              </dl>
+              </Reveal>
             ) : null}
           </div>
         </div>
@@ -129,11 +151,14 @@ export default async function HomePage() {
         className="border-line border-t py-24 sm:py-32"
       >
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
-          <h2 className="text-mono text-muted uppercase lg:col-span-3">
+          <Reveal
+            as="h2"
+            className="text-mono text-muted uppercase lg:col-span-3"
+          >
             Contact
-          </h2>
+          </Reveal>
 
-          <div className="lg:col-span-9">
+          <Reveal className="lg:col-span-9">
             {profile?.email ? (
               // An email has no spaces to break at, so it is sized to fit its
               // column rather than left to split mid-word. `anywhere` is the
@@ -188,7 +213,7 @@ export default async function HomePage() {
             <p className="text-mono text-muted mt-24 uppercase">
               © {new Date().getFullYear()} {profile?.name}
             </p>
-          </div>
+          </Reveal>
         </div>
       </Container>
     </main>
