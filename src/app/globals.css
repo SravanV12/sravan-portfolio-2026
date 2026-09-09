@@ -12,7 +12,13 @@
   --color-bg: #0a0a0b; /* near-black page ground, deliberately not #000 */
   --color-surface: #141416; /* slightly raised panel */
   --color-fg: #edede9; /* off-white body text, deliberately not #fff */
-  --color-muted: #8a8a8f; /* secondary text — 5.7:1 on bg, passes AA */
+  /*
+    Secondary text. Brightened from #8a8a8f when the WebGL environment landed:
+    the ground is no longer reliably near-black, and at the old value text over
+    the brightest part of the field fell to 3.7:1. Now 7.6:1 over bare bg and
+    4.5:1 over the field at its ceiling, so it passes AA either way.
+  */
+  --color-muted: #a0a0a5;
   --color-accent: #ff5c36; /* the only accent — 6.4:1 on bg */
   --color-line: #26262a; /* hairline borders and rules */
 

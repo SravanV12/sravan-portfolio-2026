@@ -3,6 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { Color, type ShaderMaterial, Vector2 } from "three";
+import { Dust } from "@/components/environment/dust";
 import {
   fragmentShader,
   vertexShader,
@@ -77,10 +78,51 @@ function Field() {
  * out-of-focus field, so rendering it at full retina resolution would cost a
  * great deal to produce a picture nobody can tell apart.
  */
-export function Scene({ quality }: { quality: "high" | "low" }) {
+/**
+ * Watches the frame rate and gives up if the device cannot keep pace.
+ *
+ * A background is never worth a janky page. Software rendering, an old
+ * integrated GPU, a laptop on battery saver — any of them can turn this from
+ * atmosphere into a stutter, and none of them announce themselves in advance.
+ * The first second is ignored so shader compilation is not mistaken for slow
+ * hardware.
+ */
+function PerformanceGuard({ onSlow }: { onSlow: () => void }) {
+  const frames = useRef(0);
+  const elapsed = useRef(0);
+  const settled = useRef(0);
+
+  useFrame((_, delta) => {
+    settled.current += delta;
+    if (settled.current < 1) return;
+
+    frames.current += 1;
+    elapsed.current += delta;
+
+    if (elapsed.current >= 2) {
+      const fps = frames.current / elapsed.current;
+      if (fps < 24) onSlow();
+      frames.current = 0;
+      elapsed.current = 0;
+    }
+  });
+
+  return null;
+}
+
+export function Scene({
+  quality,
+  onSlow,
+}: {
+  quality: "high" | "low";
+  onSlow: () => void;
+}) {
   return (
     <Canvas
-      dpr={quality === "high" ? [1, 1.5] : 1}
+      // Rendered well below device resolution. This is a soft, out-of-focus
+      // field — at full retina resolution it costs several times as much to
+      // produce a picture nobody can tell apart.
+      dpr={quality === "high" ? [0.75, 1] : 0.6}
       gl={{
         antialias: false,
         alpha: false,
@@ -91,7 +133,11 @@ export function Scene({ quality }: { quality: "high" | "low" }) {
       camera={{ position: [0, 0, 1], fov: 50 }}
       style={{ position: "absolute", inset: 0 }}
     >
+      <PerformanceGuard onSlow={onSlow} />
       <Field />
+      {/* Fewer motes on the low tier: this pass is additive and full-screen,
+          so the count is the main thing driving its cost. */}
+      <Dust count={quality === "high" ? 400 : 180} />
     </Canvas>
   );
 }

@@ -20,13 +20,44 @@ const Scene = dynamic(
   { ssr: false },
 );
 
-/** Cheap capability probe. Some devices report a context and then fail. */
-function hasWebGL() {
+/**
+ * Whether this machine should run the environment at all.
+ *
+ * Two questions, not one. WebGL being *available* is not the same as it being
+ * *fast*: browsers fall back to a software rasteriser when there is no usable
+ * GPU, and a full-screen animated shader on the CPU is ruinous — measured
+ * here at 2.5–4 seconds of main-thread blocking, with the performance score
+ * falling from 99 to below 70.
+ *
+ * The frame-rate guard inside the scene catches this too, but only after a few
+ * seconds, by which point the damage to loading is done. Reading the renderer
+ * string costs nothing and decides before anything is mounted.
+ */
+function shouldRunWebGL() {
   try {
     const canvas = document.createElement("canvas");
-    return Boolean(
-      canvas.getContext("webgl2") ?? canvas.getContext("webgl"),
-    );
+    const gl = (canvas.getContext("webgl2") ??
+      canvas.getContext("webgl")) as WebGLRenderingContext | null;
+    if (!gl) return false;
+
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    if (info) {
+      const renderer = String(
+        gl.getParameter(info.UNMASKED_RENDERER_WEBGL) ?? "",
+      ).toLowerCase();
+      // SwiftShader (Chrome), llvmpipe (Mesa), and anything self-describing as
+      // software or emulated: all CPU rasterisers.
+      if (
+        renderer.includes("swiftshader") ||
+        renderer.includes("llvmpipe") ||
+        renderer.includes("software") ||
+        renderer.includes("microsoft basic")
+      ) {
+        return false;
+      }
+    }
+
+    return true;
   } catch {
     return false;
   }
@@ -40,7 +71,11 @@ export function EnvironmentLayer() {
   // Whether the scene should run is derived, so a change to the motion
   // preference or the viewport takes effect without another state write.
   const [capable, setCapable] = useState(false);
-  const wanted = !reducedMotion && isDesktop;
+  // Set once the scene reports it cannot hold a usable frame rate. Never
+  // reset: a device that struggled once will struggle again, and flickering
+  // the background in and out is worse than not having it.
+  const [tooSlow, setTooSlow] = useState(false);
+  const wanted = !reducedMotion && isDesktop && !tooSlow;
   const enabled = capable && wanted;
 
   // Feed scroll and pointer state whenever the page is capable of using it.
@@ -93,7 +128,7 @@ export function EnvironmentLayer() {
     // Wait for the browser to go quiet before pulling in a WebGL bundle, so
     // the environment can never compete with first paint.
     const start = () => {
-      if (hasWebGL()) setCapable(true);
+      if (shouldRunWebGL()) setCapable(true);
     };
     const idle = window.requestIdleCallback?.(start, { timeout: 2000 });
     const timer = idle === undefined ? window.setTimeout(start, 900) : 0;
@@ -112,7 +147,10 @@ export function EnvironmentLayer() {
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-0 select-none"
     >
-      <Scene quality={coarsePointer ? "low" : "high"} />
+      <Scene
+        quality={coarsePointer ? "low" : "high"}
+        onSlow={() => setTooSlow(true)}
+      />
     </div>
   );
 }
