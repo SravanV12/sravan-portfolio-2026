@@ -12,6 +12,10 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   display: "swap",
+  // Not preloaded: mono is only used for small metadata labels, none of which
+  // are the LCP element. Preloading both faces made them compete for
+  // bandwidth and delayed the headline, which is what LCP actually measures.
+  preload: false,
 });
 
 export const metadata: Metadata = {

@@ -17,6 +17,7 @@ export const PROFILE_QUERY = groq`
     github,
     "resumeUrl": resumeFile.asset->url,
     skillGroups[]{
+      _key,
       label,
       items
     }
@@ -53,10 +54,12 @@ export const CASE_STUDY_QUERY = groq`
     stack,
     showPlatformSection,
     platforms[]{
+      _key,
       label,
       description
     },
     sections[]{
+      _key,
       heading,
       body
     },
@@ -64,6 +67,7 @@ export const CASE_STUDY_QUERY = groq`
       title,
       altText,
       nodes[]{
+        _key,
         id,
         label,
         sublabel,
@@ -71,6 +75,7 @@ export const CASE_STUDY_QUERY = groq`
         row
       },
       edges[]{
+        _key,
         from,
         to,
         label,

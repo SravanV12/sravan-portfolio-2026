@@ -30,6 +30,9 @@ export type PortableTextBlock = {
 };
 
 export type SkillGroup = {
+  /** Sanity's per-item key. Unique within the array — use it for React keys,
+      never the label, which is optional and may repeat. */
+  _key: string;
   label?: string;
   items?: string[];
 };
@@ -58,16 +61,19 @@ export type CaseStudyCard = {
 };
 
 export type CaseStudySection = {
+  _key: string;
   heading?: string;
   body?: PortableTextBlock[];
 };
 
 export type Platform = {
+  _key: string;
   label?: string;
   description?: string;
 };
 
 export type DiagramNode = {
+  _key: string;
   id?: string;
   label?: string;
   sublabel?: string;
@@ -76,6 +82,7 @@ export type DiagramNode = {
 };
 
 export type DiagramEdge = {
+  _key: string;
   from?: string;
   to?: string;
   label?: string;

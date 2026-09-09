@@ -83,7 +83,7 @@ export default async function CaseStudyPage({
               <div>
                 {caseStudy.sections.map((section) => (
                   <section
-                    key={section.heading}
+                    key={section._key}
                     className="border-line mt-16 border-t pt-8 first:mt-0 first:border-t-0 first:pt-0"
                   >
                     <h2 className="text-mono text-muted uppercase">
@@ -102,7 +102,7 @@ export default async function CaseStudyPage({
                 <h2 className="text-mono text-muted uppercase">Platforms</h2>
                 <div className="mt-8 grid gap-10 sm:grid-cols-2">
                   {caseStudy.platforms.map((platform) => (
-                    <div key={platform.label}>
+                    <div key={platform._key}>
                       <h3 className="text-h3">{platform.label}</h3>
                       <p className="text-body text-muted mt-3">
                         {platform.description}

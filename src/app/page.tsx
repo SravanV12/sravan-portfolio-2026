@@ -106,7 +106,7 @@ export default async function HomePage() {
             {profile?.skillGroups?.length ? (
               <dl className="border-line mt-20 grid gap-10 border-t pt-12 sm:grid-cols-2 lg:grid-cols-3">
                 {profile.skillGroups.map((group) => (
-                  <div key={group.label}>
+                  <div key={group._key}>
                     <dt className="text-mono text-muted uppercase">
                       {group.label}
                     </dt>
