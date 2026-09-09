@@ -1,5 +1,19 @@
 import { client } from "./client";
 
+/**
+ * Stands in for the `server-only` package, which would turn a client-side
+ * import into a build error. Adding a dependency needs approval, so this throws
+ * at module load instead — the moment any client component pulls this in, the
+ * page breaks loudly in development rather than quietly shipping CMS content
+ * and credentials to the browser.
+ */
+if (typeof window !== "undefined") {
+  throw new Error(
+    "src/sanity/fetch.ts was imported in the browser. CMS content is fetched " +
+      "at build time in server components only — pass it down as props.",
+  );
+}
+
 /** Matches the `revalidate` exported by every page. */
 export const REVALIDATE_SECONDS = 3600;
 
