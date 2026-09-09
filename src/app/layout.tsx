@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { EnvironmentLayer } from "@/components/environment/environment-layer";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import "./globals.css";
 
@@ -44,6 +45,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="bg-bg text-fg font-sans text-body flex min-h-full flex-col">
         <SmoothScroll />
+        {/* Decorative background. Absent on mobile, with reduced motion, or
+            without WebGL — the page reads identically either way. */}
+        <EnvironmentLayer />
         {/* Off-screen until focused, so a keyboard user can skip straight to
             the content instead of tabbing the whole page. */}
         <a
@@ -52,7 +56,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        {children}
+        {/* Content sits above the environment. Sections have no background of
+            their own, so the field shows through behind the type. */}
+        <div className="relative z-10 flex min-h-full flex-col">{children}</div>
       </body>
     </html>
   );

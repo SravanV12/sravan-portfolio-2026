@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 
 type ContainerProps = {
@@ -17,12 +18,17 @@ export function Container({
   children,
   ...rest
 }: ContainerProps) {
-  return (
-    <Tag
-      {...rest}
-      className={`mx-auto w-full max-w-page px-6 sm:px-8 lg:px-12 ${className}`.trimEnd()}
-    >
-      {children}
-    </Tag>
+  // createElement rather than <Tag>: the WebGL layer augments the global JSX
+  // namespace with Three's element types, which makes TypeScript resolve a
+  // generic ElementType's children to `never`. Going through createElement
+  // sidesteps that without narrowing what `as` accepts.
+  return createElement(
+    Tag,
+    {
+      ...rest,
+      className:
+        `mx-auto w-full max-w-page px-6 sm:px-8 lg:px-12 ${className}`.trimEnd(),
+    },
+    children,
   );
 }

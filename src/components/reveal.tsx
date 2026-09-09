@@ -1,6 +1,6 @@
 "use client";
 
-import type { ElementType, ReactNode } from "react";
+import type { ComponentType, ReactNode, Ref } from "react";
 import { useRef } from "react";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -25,8 +25,25 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * first paint wait for JavaScript; measured, that cost 0.3s of LCP.
  */
 
+/**
+ * The props the rendered tag actually receives.
+ *
+ * The tag is cast to this rather than left as a general `ElementType`. Two
+ * things force it: the WebGL layer augments the global JSX namespace with
+ * Three's elements, which makes an unconstrained ElementType resolve its
+ * children to `never`; and widening to every HTML tag instead produces a union
+ * TypeScript reports as "too complex to represent". Runtime is unaffected —
+ * React renders a string tag the same either way.
+ */
+type TagProps = {
+  ref?: Ref<HTMLElement>;
+  className?: string;
+  "data-reveal"?: string;
+  children?: ReactNode;
+};
+
 type RevealProps = {
-  as?: ElementType;
+  as?: string;
   /** Seconds before the animation starts. */
   delay?: number;
   /** Seconds between children. Set it to animate children instead of the box. */
@@ -36,12 +53,13 @@ type RevealProps = {
 };
 
 export function Reveal({
-  as: Tag = "div",
+  as = "div",
   delay = 0,
   stagger,
   className,
   children,
 }: RevealProps) {
+  const Tag = as as unknown as ComponentType<TagProps>;
   const ref = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
 
