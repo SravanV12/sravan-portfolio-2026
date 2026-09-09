@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/container";
+import { KineticText } from "@/components/kinetic-text";
 import { PlatformSection } from "@/components/platform-section";
 import { PortableText } from "@/components/portable-text";
 import { Reveal } from "@/components/reveal";
@@ -51,9 +52,13 @@ export default async function CaseStudyPage({
 
         {/* Above the fold, so not revealed — same LCP reasoning as the hero. */}
         <header className="mt-16">
-          <h1 className="text-h1 max-w-[18ch] text-balance">
-            {caseStudy.title}
-          </h1>
+          <KineticText
+            as="h1"
+            text={caseStudy.title ?? ""}
+            mode="focus"
+            stagger={0.02}
+            className="text-h1 block max-w-[18ch] text-balance"
+          />
           {caseStudy.summary ? (
             <p className="text-h3 text-muted mt-8 max-w-[44ch]">
               {caseStudy.summary}

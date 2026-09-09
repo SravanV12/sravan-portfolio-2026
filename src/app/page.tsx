@@ -1,17 +1,15 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
+import { KineticText } from "@/components/kinetic-text";
+import { Magnetic } from "@/components/magnetic";
 import { PortableText } from "@/components/portable-text";
 import { Reveal } from "@/components/reveal";
+import { WorkRow } from "@/components/work-row";
 import { sanityFetch } from "@/sanity/fetch";
 import { CASE_STUDIES_QUERY, PROFILE_QUERY } from "@/sanity/queries";
 import type { CaseStudyCard, Profile } from "@/sanity/types";
 
 export const revalidate = 3600;
-
-/** Two-digit index for the work rows. Editorial, not decorative. */
-function ordinal(index: number) {
-  return String(index + 1).padStart(2, "0");
-}
 
 export default async function HomePage() {
   const [profile, caseStudies] = await Promise.all([
@@ -37,67 +35,54 @@ export default async function HomePage() {
           <p className="text-mono text-muted uppercase">{profile.location}</p>
         ) : null}
 
-        <h1 className="text-display mt-8 max-w-[14ch] text-balance">
-          {profile?.name}
-        </h1>
+        {/* `focus` mode, not `mask`: these are above the fold and one of them
+            is the LCP element, so they must be painted immediately and resolve
+            in place rather than arriving from behind a clip. */}
+        <KineticText
+          as="h1"
+          text={profile?.name ?? ""}
+          mode="focus"
+          stagger={0.03}
+          className="text-display mt-8 block max-w-[14ch] text-balance"
+        />
 
         {profile?.headline ? (
-          <p className="text-h2 text-muted mt-10 max-w-[24ch] text-balance">
-            {profile.headline}
-          </p>
+          <KineticText
+            as="p"
+            text={profile.headline}
+            mode="focus"
+            delay={0.25}
+            stagger={0.008}
+            className="text-h2 text-muted mt-10 block max-w-[24ch] text-balance"
+          />
         ) : null}
 
         <p className="mt-16">
-          <Link
-            href="#work"
-            className="text-mono border-line hover:border-accent hover:text-accent inline-flex items-center gap-3 border-b pb-2 uppercase transition-colors"
-          >
-            Selected work
-            <span aria-hidden="true">↓</span>
-          </Link>
+          <Magnetic>
+            <Link
+              href="#work"
+              className="text-mono border-line hover:border-accent hover:text-accent inline-flex items-center gap-3 border-b pb-2 uppercase transition-colors"
+            >
+              Selected work
+              <span aria-hidden="true">↓</span>
+            </Link>
+          </Magnetic>
         </p>
       </Container>
 
       {/* Work index. Rows, not thumbnails — there are no screenshots. */}
       <Container as="section" id="work" className="border-line border-t py-24 sm:py-32">
-        <Reveal as="h2" className="text-mono text-muted uppercase">
-          Selected work
-        </Reveal>
+        <KineticText
+          as="h2"
+          text="Selected work"
+          className="text-mono text-muted block uppercase"
+        />
 
         {/* Staggered: the rows arrive in sequence rather than as one block. */}
-        <Reveal as="ul" stagger={0.06} className="mt-12 sm:mt-16">
+        <Reveal as="ul" stagger={0.06} className="work-list mt-12 sm:mt-16">
           {caseStudies.map((item, index) => (
             <li key={item._id} className="border-line border-b">
-              <Link
-                href={`/work/${item.slug}`}
-                className="group grid gap-4 py-10 sm:py-12 lg:grid-cols-12 lg:gap-8"
-              >
-                <span className="text-mono text-muted lg:col-span-1">
-                  {ordinal(index)}
-                </span>
-
-                <div className="lg:col-span-7">
-                  <h3 className="text-h2 group-hover:text-accent transition-colors">
-                    {item.title}
-                  </h3>
-                  {item.summary ? (
-                    <p className="text-body text-muted mt-4 max-w-[52ch]">
-                      {item.summary}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="lg:col-span-4 lg:text-right">
-                  <p className="text-mono text-muted uppercase">
-                    {item.timeframe}
-                  </p>
-                  {item.stack?.length ? (
-                    <p className="text-mono text-muted mt-3 wrap-break-word">
-                      {item.stack.slice(0, 4).join(" · ")}
-                    </p>
-                  ) : null}
-                </div>
-              </Link>
+              <WorkRow item={item} index={index} />
             </li>
           ))}
         </Reveal>
@@ -106,12 +91,11 @@ export default async function HomePage() {
       {/* About. */}
       <Container as="section" id="about" className="border-line border-t py-24 sm:py-32">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
-          <Reveal
+          <KineticText
             as="h2"
-            className="text-mono text-muted uppercase lg:col-span-3"
-          >
-            About
-          </Reveal>
+            text="About"
+            className="text-mono text-muted block uppercase lg:col-span-3"
+          />
 
           <div className="lg:col-span-9">
             <Reveal>
@@ -151,12 +135,11 @@ export default async function HomePage() {
         className="border-line border-t py-24 sm:py-32"
       >
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
-          <Reveal
+          <KineticText
             as="h2"
-            className="text-mono text-muted uppercase lg:col-span-3"
-          >
-            Contact
-          </Reveal>
+            text="Contact"
+            className="text-mono text-muted block uppercase lg:col-span-3"
+          />
 
           <Reveal className="lg:col-span-9">
             {profile?.email ? (

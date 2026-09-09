@@ -88,3 +88,47 @@
     opacity: 0;
   }
 }
+
+@layer components {
+  /*
+    Work rows. The perspective lives on the list so the rows share one vanishing
+    point rather than each tilting in its own little world.
+  */
+  .work-list {
+    perspective: 1400px;
+  }
+
+  .work-row {
+    transform-style: preserve-3d;
+  }
+
+  /*
+    A soft light that follows the pointer across the row. Painted as a
+    background layer rather than an extra element, so it composites cheaply and
+    adds nothing to the DOM.
+  */
+  .work-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    background: radial-gradient(
+      36rem circle at var(--x, 50%) var(--y, 50%),
+      color-mix(in oklab, var(--color-accent) 7%, transparent),
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+
+  .work-row:hover::before,
+  .work-row:focus-visible::before {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-row::before {
+      display: none;
+    }
+  }
+}
