@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/container";
+import { PlatformSection } from "@/components/platform-section";
 import { PortableText } from "@/components/portable-text";
 import { Reveal } from "@/components/reveal";
 import { sanityFetch } from "@/sanity/fetch";
@@ -101,19 +102,7 @@ export default async function CaseStudyPage({
             ) : null}
 
             {caseStudy.showPlatformSection && caseStudy.platforms?.length ? (
-              <Reveal as="section" className="border-line mt-16 border-t pt-8">
-                <h2 className="text-mono text-muted uppercase">Platforms</h2>
-                <div className="mt-8 grid gap-10 sm:grid-cols-2">
-                  {caseStudy.platforms.map((platform) => (
-                    <div key={platform._key}>
-                      <h3 className="text-h3">{platform.label}</h3>
-                      <p className="text-body text-muted mt-3">
-                        {platform.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </Reveal>
+              <PlatformSection platforms={caseStudy.platforms} />
             ) : null}
 
             {caseStudy.diagram ? (
