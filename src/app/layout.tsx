@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { EnvironmentLayer } from "@/components/environment/environment-layer";
+import { RouteTransition } from "@/components/route-transition";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import "./globals.css";
 
@@ -57,8 +58,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         {/* Content sits above the environment. Sections have no background of
-            their own, so the field shows through behind the type. */}
-        <div className="relative z-10 flex min-h-full flex-col">{children}</div>
+            their own, so the field shows through behind the type. The
+            environment stays mounted across navigations, so the world carries
+            on while only the content changes. */}
+        <RouteTransition>{children}</RouteTransition>
       </body>
     </html>
   );

@@ -140,10 +140,33 @@ export function EnvironmentLayer() {
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     frame = requestAnimationFrame(decay);
 
+    // Which section holds the viewport. An observer rather than measuring in
+    // the scroll handler: the browser does the intersection work off the main
+    // thread, and the handler stays cheap enough to run on every frame.
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>("main > section, main > footer"),
+    );
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const index = sections.indexOf(entry.target as HTMLElement);
+          if (index >= 0) scrollState.section = index;
+        }
+      },
+      // Fires when a section occupies the middle band of the screen, so the
+      // change lands when that section is genuinely what you are reading.
+      { rootMargin: "-40% 0px -40% 0px" },
+    );
+
+    for (const section of sections) observer.observe(section);
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
       cancelAnimationFrame(frame);
+      observer.disconnect();
     };
   }, [reducedMotion]);
 

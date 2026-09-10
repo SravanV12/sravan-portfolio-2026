@@ -97,6 +97,21 @@
 
 @layer components {
   /*
+    Route transitions. The stage carries the perspective so the incoming page
+    can travel on Z; `route-entering` is the pre-paint hidden state, applied
+    synchronously on navigation and removed the moment GSAP takes over. It is
+    never present on a first load, so it can never hold up the LCP element.
+  */
+  .route-stage {
+    perspective: 1400px;
+    transform-style: preserve-3d;
+  }
+
+  .route-entering {
+    opacity: 0;
+  }
+
+  /*
     Work rows. The perspective lives on the list so the rows share one vanishing
     point rather than each tilting in its own little world.
   */

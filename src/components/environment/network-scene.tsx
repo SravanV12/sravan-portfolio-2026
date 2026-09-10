@@ -168,7 +168,20 @@ export function NetworkScene({ nodeCount }: { nodeCount: number }) {
     group.rotation.x +=
       ((scrollState.pointerY - 0.5) * 0.18 - group.rotation.x) * ease;
     group.position.y += (scrollState.progress * 5.5 - group.position.y) * ease;
-    group.position.x += (3.4 - group.position.x) * ease;
+
+    // Each section gets its own camera framing of the same system, so moving
+    // between them reads as the view repositioning rather than the background
+    // simply sliding. Sections alternate which side the graph sits on, and it
+    // draws closer further down the page.
+    const section = scrollState.section;
+    const side = section % 2 === 0 ? 3.4 : -3.6;
+    const depth = -2 + Math.min(section, 3) * 0.9;
+
+    // Eased far more slowly than the pointer response: a section change should
+    // feel like a considered move, not a snap.
+    const settle = Math.min(delta * 0.9, 1);
+    group.position.x += (side - group.position.x) * settle;
+    group.position.z += (depth - group.position.z) * settle;
 
     // Where the cursor is pointing, roughly, in the graph's own space.
     cursor.set(
