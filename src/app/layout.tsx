@@ -52,7 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             the content instead of tabbing the whole page. */}
         <a
           href="#main"
-          className="text-mono bg-surface text-fg sr-only rounded px-4 py-2 uppercase focus-visible:not-sr-only focus-visible:absolute focus-visible:left-4 focus-visible:top-4 focus-visible:z-50"
+          className="text-mono bg-surface text-fg sr-only rounded px-5 py-3 uppercase focus-visible:not-sr-only focus-visible:absolute focus-visible:left-4 focus-visible:top-4 focus-visible:z-50"
         >
           Skip to content
         </a>

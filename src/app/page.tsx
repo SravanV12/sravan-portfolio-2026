@@ -161,7 +161,7 @@ export default async function HomePage() {
                     href={profile.linkedin}
                     rel="me noreferrer"
                     target="_blank"
-                    className="border-line hover:border-accent hover:text-accent border-b pb-1 transition-colors"
+                    className="border-line hover:border-accent hover:text-accent inline-block border-b pt-3 pb-1 transition-colors"
                   >
                     LinkedIn
                   </a>
@@ -173,7 +173,7 @@ export default async function HomePage() {
                     href={profile.github}
                     rel="me noreferrer"
                     target="_blank"
-                    className="border-line hover:border-accent hover:text-accent border-b pb-1 transition-colors"
+                    className="border-line hover:border-accent hover:text-accent inline-block border-b pt-3 pb-1 transition-colors"
                   >
                     GitHub
                   </a>
@@ -185,7 +185,7 @@ export default async function HomePage() {
                     href={profile.resumeUrl}
                     rel="noreferrer"
                     target="_blank"
-                    className="border-line hover:border-accent hover:text-accent border-b pb-1 transition-colors"
+                    className="border-line hover:border-accent hover:text-accent inline-block border-b pt-3 pb-1 transition-colors"
                   >
                     Resume (PDF)
                   </a>

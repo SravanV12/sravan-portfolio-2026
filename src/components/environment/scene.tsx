@@ -110,19 +110,36 @@ function PerformanceGuard({ onSlow }: { onSlow: () => void }) {
   return null;
 }
 
+export type Quality = "high" | "medium" | "low";
+
+/**
+ * Resolution per tier. Rendered well below device pixel ratio throughout —
+ * this is a soft, out-of-focus field, so full retina resolution costs several
+ * times as much to produce a picture nobody can tell apart. Phones get the
+ * lowest setting, which is what makes running it there affordable at all.
+ */
+const DPR: Record<Quality, number | [number, number]> = {
+  high: [0.75, 1],
+  medium: 0.7,
+  low: 0.5,
+};
+
+const DUST: Record<Quality, number> = {
+  high: 400,
+  medium: 260,
+  low: 140,
+};
+
 export function Scene({
   quality,
   onSlow,
 }: {
-  quality: "high" | "low";
+  quality: Quality;
   onSlow: () => void;
 }) {
   return (
     <Canvas
-      // Rendered well below device resolution. This is a soft, out-of-focus
-      // field — at full retina resolution it costs several times as much to
-      // produce a picture nobody can tell apart.
-      dpr={quality === "high" ? [0.75, 1] : 0.6}
+      dpr={DPR[quality]}
       gl={{
         antialias: false,
         alpha: false,
@@ -135,9 +152,9 @@ export function Scene({
     >
       <PerformanceGuard onSlow={onSlow} />
       <Field />
-      {/* Fewer motes on the low tier: this pass is additive and full-screen,
+      {/* Fewer motes on lower tiers: this pass is additive and full-screen,
           so the count is the main thing driving its cost. */}
-      <Dust count={quality === "high" ? 400 : 180} />
+      <Dust count={DUST[quality]} />
     </Canvas>
   );
 }

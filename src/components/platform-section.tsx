@@ -105,7 +105,11 @@ export function PlatformSection({ platforms }: Props) {
         <div className="mt-8 grid gap-12 sm:grid-cols-2">
           {platforms.map((platform) => (
             <div key={platform._key}>
-              <div className="mb-6 h-44">
+              {/* No fixed height. The frames size themselves from their width
+                  and aspect ratio, so pinning a height here meant they spilled
+                  out and landed on the heading below — measured at +53px on a
+                  414px screen. */}
+              <div className="mb-6 w-full max-w-[20rem]">
                 <DeviceFrame kind={frameKindFor(platform.label)} />
               </div>
               <h3 className="text-h3">{platform.label}</h3>
@@ -146,7 +150,7 @@ export function PlatformSection({ platforms }: Props) {
                     : "absolute inset-0 grid grid-cols-1 items-center gap-12 lg:grid-cols-2"
                 }
               >
-                <div className="h-64 lg:h-80">
+                <div className="flex items-center justify-center">
                   <DeviceFrame kind={frameKindFor(platform.label)} />
                 </div>
                 <div>

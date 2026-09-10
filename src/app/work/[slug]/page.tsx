@@ -45,7 +45,7 @@ export default async function CaseStudyPage({
       <Container as="article" className="pb-24 pt-32 sm:pb-32">
         <Link
           href="/#work"
-          className="text-mono text-muted hover:text-accent uppercase transition-colors"
+          className="text-mono text-muted hover:text-accent -mt-2 inline-block py-2 uppercase transition-colors"
         >
           ← Work
         </Link>
@@ -128,7 +128,7 @@ export default async function CaseStudyPage({
         <p className="border-line mt-24 border-t pt-8">
           <Link
             href="/#work"
-            className="text-mono text-muted hover:text-accent uppercase transition-colors"
+            className="text-mono text-muted hover:text-accent inline-block py-2 uppercase transition-colors"
           >
             ← All work
           </Link>

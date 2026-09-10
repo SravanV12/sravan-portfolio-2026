@@ -58,7 +58,10 @@ function Bars({ rows = 4 }: { rows?: number }) {
 export function DeviceFrame({ kind }: { kind: FrameKind }) {
   if (kind === "mobile") {
     return (
-      <div className="mx-auto aspect-[9/17] h-full max-h-[22rem]">
+      // Width-driven, like the others. Sizing this by height meant it needed a
+      // parent with a fixed height, which is what caused the frames to spill
+      // onto the text beneath them on narrow screens.
+      <div className="mx-auto aspect-[9/17] w-[42%] max-w-[10rem] min-w-[6rem]">
         <div className="border-line bg-surface/40 flex h-full w-full flex-col overflow-hidden rounded-[1.75rem] border-2">
           <div className="flex justify-center pt-3" aria-hidden="true">
             <span className="bg-line h-1 w-10 rounded-full" />
@@ -71,7 +74,7 @@ export function DeviceFrame({ kind }: { kind: FrameKind }) {
 
   if (kind === "desktop") {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center">
+      <div className="flex w-full flex-col items-center justify-center">
         <div className="aspect-[16/10] w-full max-w-[26rem]">
           <Shell>
             <div className="border-line flex items-center gap-3 border-b px-4 py-3">

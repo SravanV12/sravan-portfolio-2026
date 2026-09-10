@@ -63,10 +63,32 @@ function shouldRunWebGL() {
   }
 }
 
+/**
+ * How much scene this device should be asked to draw.
+ *
+ * Phones are not excluded — they get a cheaper tier rather than a blank
+ * background. What is excluded is hardware that reports too few cores or too
+ * little memory to run a full-screen shader without stealing frames from
+ * scrolling, which matters far more than atmosphere does.
+ */
+function deviceTier(isWide: boolean, isMedium: boolean): "high" | "medium" | "low" | "none" {
+  const nav = navigator as Navigator & {
+    deviceMemory?: number;
+    hardwareConcurrency?: number;
+  };
+  const memory = nav.deviceMemory ?? 8;
+  const cores = nav.hardwareConcurrency ?? 8;
+
+  if (memory <= 2 || cores <= 2) return "none";
+  if (isWide && memory >= 8 && cores >= 8) return "high";
+  if (isMedium) return "medium";
+  return "low";
+}
+
 export function EnvironmentLayer() {
   const reducedMotion = useReducedMotion();
-  const isDesktop = useMediaQuery("(min-width: 768px)");
-  const coarsePointer = useMediaQuery("(pointer: coarse)");
+  const isWide = useMediaQuery("(min-width: 1024px)");
+  const isMedium = useMediaQuery("(min-width: 768px)");
   // Only ever set from the idle callback, never synchronously in an effect.
   // Whether the scene should run is derived, so a change to the motion
   // preference or the viewport takes effect without another state write.
@@ -75,7 +97,10 @@ export function EnvironmentLayer() {
   // reset: a device that struggled once will struggle again, and flickering
   // the background in and out is worse than not having it.
   const [tooSlow, setTooSlow] = useState(false);
-  const wanted = !reducedMotion && isDesktop && !tooSlow;
+  const [tier, setTier] = useState<"high" | "medium" | "low">("low");
+  // Phones now run the scene too, at a lower tier — only reduced motion and
+  // genuinely underpowered hardware opt out entirely.
+  const wanted = !reducedMotion && !tooSlow;
   const enabled = capable && wanted;
 
   // Feed scroll and pointer state whenever the page is capable of using it.
@@ -128,7 +153,10 @@ export function EnvironmentLayer() {
     // Wait for the browser to go quiet before pulling in a WebGL bundle, so
     // the environment can never compete with first paint.
     const start = () => {
-      if (shouldRunWebGL()) setCapable(true);
+      const chosen = deviceTier(isWide, isMedium);
+      if (chosen === "none" || !shouldRunWebGL()) return;
+      setTier(chosen);
+      setCapable(true);
     };
     const idle = window.requestIdleCallback?.(start, { timeout: 2000 });
     const timer = idle === undefined ? window.setTimeout(start, 900) : 0;
@@ -137,7 +165,7 @@ export function EnvironmentLayer() {
       if (idle !== undefined) window.cancelIdleCallback?.(idle);
       else window.clearTimeout(timer);
     };
-  }, [wanted, capable]);
+  }, [wanted, capable, isWide, isMedium]);
 
   if (!enabled) return null;
 
@@ -148,7 +176,7 @@ export function EnvironmentLayer() {
       className="pointer-events-none fixed inset-0 z-0 select-none"
     >
       <Scene
-        quality={coarsePointer ? "low" : "high"}
+        quality={tier}
         onSlow={() => setTooSlow(true)}
       />
     </div>
