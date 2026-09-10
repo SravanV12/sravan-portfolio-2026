@@ -37,6 +37,7 @@ export function PlatformSection({ platforms }: Props) {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const wrapRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   const animated = isDesktop && !reducedMotion && platforms.length > 1;
 
@@ -57,25 +58,39 @@ export function PlatformSection({ platforms }: Props) {
           const dots = gsap.utils.toArray<HTMLElement>("[data-dot]");
           if (panels.length === 0) return;
 
-          gsap.set(panels.slice(1), { opacity: 0 });
           gsap.set(dots.slice(1), { opacity: 0.3 });
+
+          const track = trackRef.current;
+          if (!track) return;
 
           const timeline = gsap.timeline({
             scrollTrigger: {
               trigger: wrap,
               start: "top top",
               // The sticky child holds position for the wrapper's full height,
-              // so the crossfades run over exactly that range.
+              // so the track traverses over exactly that range.
               end: "bottom bottom",
               scrub: 1,
             },
           });
 
-          // One crossfade per transition, each occupying an equal slice.
+          // The track is N panels wide and slides left by N-1 of them, so
+          // scrolling down walks sideways through the platforms. The document
+          // itself never scrolls horizontally — this is a transform inside a
+          // clipped box, which is what keeps the page's overflow guarantee.
+          timeline.to(
+            track,
+            {
+              xPercent: (-100 * (panels.length - 1)) / panels.length,
+              ease: "none",
+              duration: panels.length - 1,
+            },
+            0,
+          );
+
+          // Indicator follows the same clock.
           for (let i = 1; i < panels.length; i++) {
             timeline
-              .to(panels[i - 1], { opacity: 0, duration: 1 }, i - 1)
-              .to(panels[i], { opacity: 1, duration: 1 }, i - 1)
               .to(dots[i - 1], { opacity: 0.3, duration: 1 }, i - 1)
               .to(dots[i], { opacity: 1, duration: 1 }, i - 1);
           }
@@ -137,23 +152,23 @@ export function PlatformSection({ platforms }: Props) {
           ref={pinRef}
           className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden"
         >
-          <div className="relative">
+          {/*
+            A horizontal track: N panels laid side by side, slid left as the
+            page is scrolled down. The panels sit in normal flow rather than
+            stacked absolutely, so each one sizes itself and the tallest can no
+            longer spill past a shorter neighbour.
+          */}
+          <div
+            ref={trackRef}
+            className="flex"
+            style={{ width: `${platforms.length * 100}%` }}
+          >
             {platforms.map((platform, index) => (
               <div
                 key={platform._key}
                 data-panel=""
-                // Stacked in one grid cell so they crossfade in place rather
-                // than pushing each other around.
-                // The panels are stacked absolutely so they crossfade in place,
-                // which means the first one sizes the box and the rest have to
-                // fit inside it. A portrait phone frame is taller than a
-                // landscape browser frame, so without a floor the tallest panel
-                // spilled 27px past the others. The floor clears the tallest.
-                className={
-                  index === 0
-                    ? "grid min-h-80 grid-cols-1 items-center gap-12 lg:grid-cols-2"
-                    : "absolute inset-0 grid min-h-80 grid-cols-1 items-center gap-12 lg:grid-cols-2"
-                }
+                className="grid min-h-80 shrink-0 grid-cols-1 items-center gap-12 lg:grid-cols-2"
+                style={{ width: `${100 / platforms.length}%` }}
               >
                 <div className="flex items-center justify-center">
                   <DeviceFrame kind={frameKindFor(platform.label)} />
@@ -163,7 +178,11 @@ export function PlatformSection({ platforms }: Props) {
                     {String(index + 1).padStart(2, "0")} / {platforms.length}
                   </p>
                   <h3 className="text-h2 mt-4">{platform.label}</h3>
-                  <p className="text-body text-muted mt-6 max-w-[42ch]">
+                  {/* No character-based max width here. Each panel is one
+                      viewport wide and split in two, so the grid column is
+                      already the measure — a 42ch cap was wider than the
+                      column and the text was being clipped mid-word. */}
+                  <p className="text-body text-muted mt-6">
                     {platform.description}
                   </p>
                 </div>
