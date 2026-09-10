@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import { Color, type Mesh, type ShaderMaterial, Vector2 } from "three";
 import { CameraRig } from "@/components/environment/camera-rig";
 import { Dust } from "@/components/environment/dust";
-import { Monolith } from "@/components/environment/monolith";
+import { NetworkScene } from "@/components/environment/network-scene";
 import {
   fragmentShader,
   vertexShader,
@@ -154,14 +154,13 @@ const DUST: Record<Quality, number> = {
 };
 
 /**
- * Subdivision of the travelling form. Each step up roughly quadruples the
- * vertex count, and the vertex shader runs noise per vertex — so this is the
- * single biggest lever on what the form costs.
+ * Node count for the system graph. Edges and packets scale with it, so this
+ * one number sets the whole scene's cost.
  */
-const DETAIL: Record<Quality, number> = {
-  high: 4,
-  medium: 3,
-  low: 2,
+const NODES: Record<Quality, number> = {
+  high: 64,
+  medium: 40,
+  low: 24,
 };
 
 export function Scene({
@@ -190,7 +189,7 @@ export function Scene({
       {/* Fewer motes on lower tiers: this pass is additive and full-screen,
           so the count is the main thing driving its cost. */}
       <Dust count={DUST[quality]} />
-      <Monolith detail={DETAIL[quality]} />
+      <NetworkScene nodeCount={NODES[quality]} />
     </Canvas>
   );
 }
