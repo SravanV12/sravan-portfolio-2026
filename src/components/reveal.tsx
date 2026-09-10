@@ -4,6 +4,14 @@ import type { ComponentType, ReactNode, Ref } from "react";
 import { useRef } from "react";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import {
+  DURATION,
+  EASE,
+  fromState,
+  type RevealVariant,
+  TO_STATE,
+  TRIGGER_START,
+} from "@/lib/motion";
 
 /**
  * The only reveal mechanism in the codebase. Anything that needs to enter on
@@ -44,18 +52,28 @@ type TagProps = {
 
 type RevealProps = {
   as?: string;
+  /**
+   * How it arrives. `depth` uses real perspective — the element comes from
+   * behind the page plane and rotates flat — so it is the one to reach for at
+   * the moments that should feel dimensional, not for every block.
+   */
+  variant?: RevealVariant;
   /** Seconds before the animation starts. */
   delay?: number;
   /** Seconds between children. Set it to animate children instead of the box. */
   stagger?: number;
+  /** Overrides the shared duration for the rare element that needs it. */
+  duration?: number;
   className?: string;
   children: ReactNode;
 };
 
 export function Reveal({
   as = "div",
+  variant = "slide-up",
   delay = 0,
   stagger,
+  duration = DURATION.base,
   className,
   children,
 }: RevealProps) {
@@ -90,19 +108,32 @@ export function Reveal({
             return;
           }
 
+          // Distances scale with the viewport: the same 32px slide is a small
+          // gesture on a desktop and a large one on a phone.
+          const from = fromState(variant, window.innerWidth);
+
           // Take over the hidden state as an inline style before releasing the
           // CSS one, so there is no frame where content flashes into view.
-          gsap.set(targets, { opacity: 0, y: 16 });
+          gsap.set(targets, from);
           node.removeAttribute("data-reveal");
 
+          // Perspective has to live on the parent for a Z translation to read
+          // as depth rather than as a plain scale.
+          if (variant === "depth" && node.parentElement) {
+            node.parentElement.style.perspective = "1200px";
+          }
+
           gsap.to(targets, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out",
+            ...TO_STATE,
+            duration,
+            ease: EASE.enter,
             delay,
             stagger: stagger ?? 0,
-            scrollTrigger: { trigger: node, start: "top 85%", once: true },
+            scrollTrigger: {
+              trigger: node,
+              start: TRIGGER_START,
+              once: true,
+            },
           });
         }, ref);
       })
@@ -116,7 +147,7 @@ export function Reveal({
       // Kills the tween, its ScrollTrigger and every inline style it set.
       context?.revert();
     };
-  }, [reducedMotion, delay, stagger]);
+  }, [reducedMotion, variant, delay, stagger, duration]);
 
   return (
     <Tag ref={ref} data-reveal="" className={className}>

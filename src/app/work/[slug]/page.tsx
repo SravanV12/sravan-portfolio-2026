@@ -111,7 +111,11 @@ export default async function CaseStudyPage({
             ) : null}
 
             {caseStudy.diagram ? (
-              <Reveal as="section" className="border-line mt-16 border-t pt-8">
+              <Reveal
+                as="section"
+                variant="depth"
+                className="border-line mt-16 border-t pt-8"
+              >
                 <h2 className="text-mono text-muted uppercase">Architecture</h2>
                 <h3 className="text-h3 mt-6">{caseStudy.diagram.title}</h3>
                 {/* The animated figure is built in step 09. Until then the alt

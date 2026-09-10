@@ -5,6 +5,7 @@ import { Magnetic } from "@/components/magnetic";
 import { PortableText } from "@/components/portable-text";
 import { Reveal } from "@/components/reveal";
 import { WorkRow } from "@/components/work-row";
+import { DURATION, STAGGER } from "@/lib/motion";
 import { sanityFetch } from "@/sanity/fetch";
 import { CASE_STUDIES_QUERY, PROFILE_QUERY } from "@/sanity/queries";
 import type { CaseStudyCard, Profile } from "@/sanity/types";
@@ -79,7 +80,12 @@ export default async function HomePage() {
         />
 
         {/* Staggered: the rows arrive in sequence rather than as one block. */}
-        <Reveal as="ul" stagger={0.06} className="work-list mt-12 sm:mt-16">
+        <Reveal
+          as="ul"
+          variant="depth"
+          stagger={STAGGER.base}
+          className="work-list mt-12 sm:mt-16"
+        >
           {caseStudies.map((item, index) => (
             <li key={item._id} className="border-line border-b">
               <WorkRow item={item} index={index} />
@@ -98,7 +104,7 @@ export default async function HomePage() {
           />
 
           <div className="lg:col-span-9">
-            <Reveal>
+            <Reveal variant="slide-right" duration={DURATION.slow}>
               <PortableText
                 value={profile?.intro}
                 className="text-h3 max-w-[38ch] font-normal"
@@ -108,7 +114,8 @@ export default async function HomePage() {
             {profile?.skillGroups?.length ? (
               <Reveal
                 as="dl"
-                stagger={0.05}
+                variant="scale"
+                stagger={STAGGER.tight}
                 className="border-line mt-20 grid gap-10 border-t pt-12 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {profile.skillGroups.map((group) => (
@@ -141,7 +148,7 @@ export default async function HomePage() {
             className="text-mono text-muted block uppercase lg:col-span-3"
           />
 
-          <Reveal className="lg:col-span-9">
+          <Reveal variant="slide-up" duration={DURATION.slow} className="lg:col-span-9">
             {profile?.email ? (
               // An email has no spaces to break at, so it is sized to fit its
               // column rather than left to split mid-word. `anywhere` is the

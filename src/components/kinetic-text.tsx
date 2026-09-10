@@ -70,13 +70,16 @@ export function KineticText({
         if (cancelled || !ref.current) return;
         const node = ref.current;
         const chars = node.querySelectorAll("[data-char]");
-        if (chars.length === 0) return;
+        // In focus mode the element itself is the target — there are no
+        // character spans, by design.
+        const targets = mode === "focus" ? [node] : Array.from(chars);
+        if (targets.length === 0) return;
 
         context = gsap.context(() => {
           if (mode === "focus") {
             // Starts visible: painted immediately, then resolves.
             gsap.fromTo(
-              chars,
+              targets,
               { filter: "blur(12px)", opacity: 0.35, y: 6 },
               {
                 filter: "blur(0px)",
@@ -85,14 +88,14 @@ export function KineticText({
                 duration: 1.1,
                 ease: "power3.out",
                 delay,
-                stagger,
+                stagger: mode === "focus" ? 0 : stagger,
               },
             );
             return;
           }
 
           gsap.fromTo(
-            chars,
+            targets,
             { yPercent: 115 },
             {
               yPercent: 0,
@@ -115,19 +118,23 @@ export function KineticText({
     };
   }, [split, reducedMotion, mode, delay, stagger]);
 
-  if (!split) {
-    return <Tag ref={ref} className={className}>{text}</Tag>;
+  // `focus` mode never splits. Blurring the whole block is visually identical
+  // to blurring each character, and splitting meant carrying a duplicate copy
+  // of the text for assistive technology — which also duplicated it on copy
+  // and paste. One copy of the words, always.
+  if (!split || mode === "focus") {
+    return (
+      <Tag ref={ref} className={className}>
+        {text}
+      </Tag>
+    );
   }
 
   return (
-    <Tag ref={ref} className={className}>
-      {/*
-        The real text, for assistive technology, kept out of sight. An
-        aria-label would be simpler but is prohibited on generic elements like
-        <p>, which fails an audit rather than helping anyone. This works on any
-        tag, and the split spans below are hidden so nothing is read twice.
-      */}
-      <span className="sr-only">{text}</span>
+    // `mask` mode is for headings, where aria-label is valid. The split
+    // characters are hidden from assistive technology and the label carries
+    // the real text — no second copy in the DOM.
+    <Tag ref={ref} className={className} aria-label={text}>
       {text.split(" ").map((word, wordIndex, words) => (
         <span
           key={`${word}-${wordIndex}`}

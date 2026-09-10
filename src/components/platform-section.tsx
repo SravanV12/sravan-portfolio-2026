@@ -144,10 +144,15 @@ export function PlatformSection({ platforms }: Props) {
                 data-panel=""
                 // Stacked in one grid cell so they crossfade in place rather
                 // than pushing each other around.
+                // The panels are stacked absolutely so they crossfade in place,
+                // which means the first one sizes the box and the rest have to
+                // fit inside it. A portrait phone frame is taller than a
+                // landscape browser frame, so without a floor the tallest panel
+                // spilled 27px past the others. The floor clears the tallest.
                 className={
                   index === 0
-                    ? "grid grid-cols-1 items-center gap-12 lg:grid-cols-2"
-                    : "absolute inset-0 grid grid-cols-1 items-center gap-12 lg:grid-cols-2"
+                    ? "grid min-h-80 grid-cols-1 items-center gap-12 lg:grid-cols-2"
+                    : "absolute inset-0 grid min-h-80 grid-cols-1 items-center gap-12 lg:grid-cols-2"
                 }
               >
                 <div className="flex items-center justify-center">
