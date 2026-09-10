@@ -5,6 +5,7 @@ import { KineticText } from "@/components/kinetic-text";
 import { PlatformSection } from "@/components/platform-section";
 import { PortableText } from "@/components/portable-text";
 import { Reveal } from "@/components/reveal";
+import { caseStudyTransitionName } from "@/lib/view-transition";
 import { sanityFetch } from "@/sanity/fetch";
 import { CASE_STUDY_QUERY, CASE_STUDY_SLUGS_QUERY } from "@/sanity/queries";
 import type { CaseStudy, CaseStudySlug } from "@/sanity/types";
@@ -58,6 +59,13 @@ export default async function CaseStudyPage({
             mode="focus"
             stagger={0.02}
             className="text-h1 block max-w-[18ch] text-balance"
+            // Pairs with the row on the index: the browser animates the title
+            // from its position in the list to its position here.
+            style={{
+              viewTransitionName: caseStudy.slug
+                ? caseStudyTransitionName(caseStudy.slug)
+                : undefined,
+            }}
           />
           {caseStudy.summary ? (
             <p className="text-h3 text-muted mt-8 max-w-[44ch]">

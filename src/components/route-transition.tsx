@@ -6,6 +6,10 @@ import { useRef } from "react";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { DURATION, EASE } from "@/lib/motion";
+import {
+  clearSharedTransition,
+  isSharedTransitionRunning,
+} from "@/lib/view-transition";
 
 /**
  * Content arrives through depth when the route changes.
@@ -39,6 +43,13 @@ export function RouteTransition({ children }: { children: ReactNode }) {
     previousPath.current = pathname;
 
     if (reducedMotion) return;
+
+    // A shared-element transition is already carrying this navigation. Playing
+    // the page fade on top of it reads as a stutter rather than one move.
+    if (isSharedTransitionRunning()) {
+      clearSharedTransition();
+      return;
+    }
 
     // Applied before paint so the incoming page is never briefly visible in
     // its final position.

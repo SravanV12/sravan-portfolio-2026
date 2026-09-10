@@ -1,10 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import {
+  caseStudyTransitionName,
+  withViewTransition,
+} from "@/lib/view-transition";
 import type { CaseStudyCard } from "@/sanity/types";
 
 /**
@@ -31,6 +36,7 @@ function ordinal(index: number) {
 
 export function WorkRow({ item, index }: Props) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const router = useRouter();
   const reducedMotion = useReducedMotion();
   const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)");
 
@@ -94,6 +100,14 @@ export function WorkRow({ item, index }: Props) {
     <Link
       ref={ref}
       href={`/work/${item.slug}`}
+      onClick={(event) => {
+        // Let modified clicks (new tab, download) behave normally.
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+        const handled = withViewTransition(() => {
+          router.push(`/work/${item.slug}`);
+        });
+        if (handled) event.preventDefault();
+      }}
       className="group work-row relative grid gap-4 py-10 transition-colors sm:py-12 lg:grid-cols-12 lg:gap-8"
     >
       <span className="text-mono text-muted lg:col-span-1">
@@ -101,7 +115,16 @@ export function WorkRow({ item, index }: Props) {
       </span>
 
       <div className="lg:col-span-7">
-        <h3 className="text-h2 group-hover:text-accent transition-colors">
+        {/* The browser pairs this with the heading on the case study page
+            and animates between the two positions itself. */}
+        <h3
+          className="text-h2 group-hover:text-accent transition-colors"
+          style={{
+            viewTransitionName: item.slug
+              ? caseStudyTransitionName(item.slug)
+              : undefined,
+          }}
+        >
           {item.title}
         </h3>
         {item.summary ? (

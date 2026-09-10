@@ -153,3 +153,29 @@
     }
   }
 }
+
+/*
+  View transitions. The shared title crossfades and moves under one easing;
+  everything else on the page swaps quickly so the title is what the eye
+  follows. Wrapped in a support query so it costs nothing where the API is
+  absent, and disabled outright under reduced motion.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.35s;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: 0.55s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

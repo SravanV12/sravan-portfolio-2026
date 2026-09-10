@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType, ReactNode, Ref } from "react";
+import type { ComponentType, CSSProperties, ReactNode, Ref } from "react";
 import { useRef } from "react";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
@@ -29,6 +29,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 type TagProps = {
   ref?: Ref<HTMLElement>;
   className?: string;
+  style?: CSSProperties;
   "aria-label"?: string;
   children?: ReactNode;
 };
@@ -38,6 +39,8 @@ type KineticTextProps = {
   as?: string;
   className?: string;
   mode?: "mask" | "focus";
+  /** Escape hatch for view-transition names, which must be inline. */
+  style?: CSSProperties;
   delay?: number;
   /** Seconds between characters. */
   stagger?: number;
@@ -48,6 +51,7 @@ export function KineticText({
   as = "span",
   className,
   mode = "mask",
+  style,
   delay = 0,
   stagger = 0.018,
 }: KineticTextProps) {
@@ -124,7 +128,7 @@ export function KineticText({
   // and paste. One copy of the words, always.
   if (!split || mode === "focus") {
     return (
-      <Tag ref={ref} className={className}>
+      <Tag ref={ref} className={className} style={style}>
         {text}
       </Tag>
     );
@@ -134,7 +138,7 @@ export function KineticText({
     // `mask` mode is for headings, where aria-label is valid. The split
     // characters are hidden from assistive technology and the label carries
     // the real text — no second copy in the DOM.
-    <Tag ref={ref} className={className} aria-label={text}>
+    <Tag ref={ref} className={className} style={style} aria-label={text}>
       {text.split(" ").map((word, wordIndex, words) => (
         <span
           key={`${word}-${wordIndex}`}

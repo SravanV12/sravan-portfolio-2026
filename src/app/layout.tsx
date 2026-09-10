@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { EnvironmentLayer } from "@/components/environment/environment-layer";
+import { SiteNav } from "@/components/site-nav";
 import { RouteTransition } from "@/components/route-transition";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import "./globals.css";
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             their own, so the field shows through behind the type. The
             environment stays mounted across navigations, so the world carries
             on while only the content changes. */}
+        <SiteNav />
         <RouteTransition>{children}</RouteTransition>
       </body>
     </html>
