@@ -2,8 +2,10 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
-import { Color, type ShaderMaterial, Vector2 } from "three";
+import { Color, type Mesh, type ShaderMaterial, Vector2 } from "three";
+import { CameraRig } from "@/components/environment/camera-rig";
 import { Dust } from "@/components/environment/dust";
+import { Monolith } from "@/components/environment/monolith";
 import {
   fragmentShader,
   vertexShader,
@@ -23,9 +25,13 @@ function tokenColour(name: string, fallback: string) {
   return new Color(value || fallback);
 }
 
+/** How far in front of the camera the backdrop sits, in world units. */
+const BACKDROP_DISTANCE = 26;
+
 function Field() {
   const materialRef = useRef<ShaderMaterial>(null);
-  const { viewport, size } = useThree();
+  const meshRef = useRef<Mesh>(null);
+  const { size, camera } = useThree();
 
   const uniforms = useMemo(
     () => ({
@@ -56,10 +62,27 @@ function Field() {
     u.uVelocity.value += (scrollState.velocity - u.uVelocity.value) * ease;
     u.uPointer.value.x += (scrollState.pointerX - u.uPointer.value.x) * ease;
     u.uPointer.value.y += (scrollState.pointerY - u.uPointer.value.y) * ease;
+
+    // Ride with the camera so the backdrop always fills the frame however the
+    // rig moves. Everything else in the scene sits between here and the lens,
+    // which is what gives them parallax against it.
+    const mesh = meshRef.current;
+    if (!mesh) return;
+    mesh.position.copy(camera.position);
+    mesh.quaternion.copy(camera.quaternion);
+    mesh.translateZ(-BACKDROP_DISTANCE);
+
+    const perspective = camera as typeof camera & { fov?: number };
+    const fov = perspective.fov ?? 45;
+    const height =
+      2 * Math.tan((fov * Math.PI) / 360) * BACKDROP_DISTANCE;
+    mesh.scale.set(height * (size.width / Math.max(size.height, 1)), height, 1);
   });
 
   return (
-    <mesh scale={[viewport.width, viewport.height, 1]}>
+    // Never culled: it is repositioned every frame, and a stale bounding
+    // sphere would flicker it out at the edges of camera movement.
+    <mesh ref={meshRef} frustumCulled={false}>
       <planeGeometry args={[1, 1]} />
       <shaderMaterial
         ref={materialRef}
@@ -130,6 +153,17 @@ const DUST: Record<Quality, number> = {
   low: 140,
 };
 
+/**
+ * Subdivision of the travelling form. Each step up roughly quadruples the
+ * vertex count, and the vertex shader runs noise per vertex — so this is the
+ * single biggest lever on what the form costs.
+ */
+const DETAIL: Record<Quality, number> = {
+  high: 4,
+  medium: 3,
+  low: 2,
+};
+
 export function Scene({
   quality,
   onSlow,
@@ -147,14 +181,16 @@ export function Scene({
         // Nothing reads pixels back, so the browser can discard the buffer.
         preserveDrawingBuffer: false,
       }}
-      camera={{ position: [0, 0, 1], fov: 50 }}
+      camera={{ position: [0, 0, 5], fov: 45, near: 0.1, far: 60 }}
       style={{ position: "absolute", inset: 0 }}
     >
       <PerformanceGuard onSlow={onSlow} />
+      <CameraRig />
       <Field />
       {/* Fewer motes on lower tiers: this pass is additive and full-screen,
           so the count is the main thing driving its cost. */}
       <Dust count={DUST[quality]} />
+      <Monolith detail={DETAIL[quality]} />
     </Canvas>
   );
 }

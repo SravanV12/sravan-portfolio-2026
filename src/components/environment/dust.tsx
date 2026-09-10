@@ -1,6 +1,6 @@
 "use client";
 
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import {
   AdditiveBlending,
@@ -39,16 +39,17 @@ const vertexShader = /* glsl */ `
   void main() {
     vec3 pos = position;
 
-    // Parallax: near motes travel far, distant ones hold station.
-    float parallax = mix(0.15, 1.6, aDepth);
-    pos.y += uScroll * parallax * 9.0;
-    pos.x += sin(uTime * 0.12 + aSeed * 6.28) * 0.12 * aDepth;
+    // Parallax: near motes travel far, distant ones hold station. The camera
+    // rig supplies perspective parallax on top of this.
+    float parallax = mix(0.3, 2.4, aDepth);
+    pos.y += uScroll * parallax * 14.0;
+    pos.x += sin(uTime * 0.12 + aSeed * 6.28) * 0.35 * aDepth;
 
     // The pointer nudges the near layers only, which reads as depth.
-    pos.xy += (uPointer - 0.5) * aDepth * 0.6;
+    pos.xy += (uPointer - 0.5) * aDepth * 1.4;
 
     // Wrap so the field is endless rather than running out.
-    pos.y = mod(pos.y + 6.0, 12.0) - 6.0;
+    pos.y = mod(pos.y + 12.0, 24.0) - 12.0;
 
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -70,8 +71,8 @@ const vertexShader = /* glsl */ `
 `;
 
 const fragmentShader = /* glsl */ `
-  precision mediump float;
-
+  // Precision is left to Three, so it matches the vertex stage. Declaring it
+  // by hand here risks a varying-precision mismatch and a link failure.
   uniform vec3 uAccent;
   uniform vec3 uFg;
 
@@ -124,7 +125,7 @@ function tokenColour(name: string, fallback: string) {
 export function Dust({ count }: { count: number }) {
   const pointsRef = useRef<Points>(null);
   const materialRef = useRef<ShaderMaterial>(null);
-  const { viewport } = useThree();
+
 
   const { positions, depths, seeds } = useMemo(() => {
     const positions = new Float32Array(count * 3);
@@ -134,9 +135,11 @@ export function Dust({ count }: { count: number }) {
     const random = makeRandom(0x5eed);
 
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (random() - 0.5) * 16;
-      positions[i * 3 + 1] = (random() - 0.5) * 12;
-      positions[i * 3 + 2] = -random() * 6;
+      // Spread through real depth between the lens and the backdrop, so the
+      // camera rig produces genuine parallax rather than a flat sheet sliding.
+      positions[i * 3] = (random() - 0.5) * 30;
+      positions[i * 3 + 1] = (random() - 0.5) * 24;
+      positions[i * 3 + 2] = -1 - random() * 20;
       // Biased towards the far field, so the near layer stays sparse and the
       // effect never turns into confetti.
       depths[i] = Math.pow(random(), 1.7);
@@ -177,7 +180,9 @@ export function Dust({ count }: { count: number }) {
   return (
     <points
       ref={pointsRef}
-      scale={[viewport.width / 6, viewport.height / 6, 1]}
+      // World units now, not viewport-relative: the motes occupy actual space
+      // between the camera and the backdrop.
+      frustumCulled={false}
       // Drawn after the field and without depth testing, so the motes always
       // sit in front of it. Their sense of depth comes from the parallax
       // attribute, not from where they actually are in Z.
