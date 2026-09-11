@@ -3,9 +3,13 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { Color, type Mesh, type ShaderMaterial, Vector2 } from "three";
+import { Atmosphere } from "@/components/environment/atmosphere";
+import { CameraImpulse } from "@/components/environment/camera-impulse";
 import { CameraRig } from "@/components/environment/camera-rig";
 import { Dust } from "@/components/environment/dust";
+import { GridPlanes } from "@/components/environment/grid-planes";
 import { NetworkScene } from "@/components/environment/network-scene";
+import { Sparks } from "@/components/environment/sparks";
 import {
   fragmentShader,
   vertexShader,
@@ -163,6 +167,29 @@ const NODES: Record<Quality, number> = {
   low: 24,
 };
 
+/** Embers in a click burst. */
+const SPARKS: Record<Quality, number> = {
+  high: 140,
+  medium: 90,
+  low: 0,
+};
+
+/**
+ * Which of the added layers each tier gets.
+ *
+ * The grid floor and the lens are on everywhere: the floor is what gives the
+ * scene a sense of depth at all, and the lens is a single quad whose vignette
+ * makes the type over it easier to read, not harder. What the lower tiers lose
+ * is the second grid plane, the embers and the pointer wiring — the parts that
+ * are pure ornament, and the parts that cost either another full-screen
+ * additive pass or per-frame work on the main thread.
+ */
+const LAYERS: Record<Quality, { ceiling: boolean; probe: boolean }> = {
+  high: { ceiling: true, probe: true },
+  medium: { ceiling: true, probe: false },
+  low: { ceiling: false, probe: false },
+};
+
 export function Scene({
   quality,
   onSlow,
@@ -185,11 +212,20 @@ export function Scene({
     >
       <PerformanceGuard onSlow={onSlow} />
       <CameraRig />
+      {/* Strictly after the rig. Frame callbacks run in mount order, and this
+          adds drift and shake on top of the rotation the rig has just set. */}
+      <CameraImpulse />
       <Field />
+      {/* The ground the rest of the scene stands on. Drawn before everything
+          so the motes and the graph read as being in front of it. */}
+      <GridPlanes ceiling={LAYERS[quality].ceiling} />
       {/* Fewer motes on lower tiers: this pass is additive and full-screen,
           so the count is the main thing driving its cost. */}
       <Dust count={DUST[quality]} />
-      <NetworkScene nodeCount={NODES[quality]} />
+      <NetworkScene nodeCount={NODES[quality]} probe={LAYERS[quality].probe} />
+      {SPARKS[quality] > 0 ? <Sparks count={SPARKS[quality]} /> : null}
+      {/* Last. This is the lens, so it is applied over a finished frame. */}
+      <Atmosphere />
     </Canvas>
   );
 }

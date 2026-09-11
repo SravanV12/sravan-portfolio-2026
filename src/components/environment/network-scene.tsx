@@ -12,6 +12,7 @@ import {
   Vector3,
 } from "three";
 import { buildTopology } from "@/components/environment/network";
+import { PointerProbe } from "@/components/environment/pointer-probe";
 import { scrollState } from "@/lib/scroll-state";
 
 /**
@@ -185,7 +186,14 @@ function tokenColour(name: string, fallback: string) {
   return new Color(value || fallback);
 }
 
-export function NetworkScene({ nodeCount }: { nodeCount: number }) {
+export function NetworkScene({
+  nodeCount,
+  probe,
+}: {
+  nodeCount: number;
+  /** Whether to wire the pointer into the graph. Off on the cheapest tier. */
+  probe: boolean;
+}) {
   const groupRef = useRef<Group>(null);
   const nodesRef = useRef<InstancedMesh>(null);
   const edgeMaterialRef = useRef<ShaderMaterial>(null);
@@ -259,6 +267,9 @@ export function NetworkScene({ nodeCount }: { nodeCount: number }) {
       scrollState.impulse = 0;
     }
     shock.current = Math.max(shock.current - delta * 1.8, 0);
+    // Published so the layers added around this one — embers, camera kick,
+    // grid flare — answer the same press on the same curve.
+    scrollState.shock = shock.current;
     // Eased rather than linear, so the wave leaves fast and settles slowly.
     const shockEased = shock.current * shock.current;
 
@@ -468,6 +479,11 @@ export function NetworkScene({ nodeCount }: { nodeCount: number }) {
           blending={AdditiveBlending}
         />
       </points>
+
+      {/* Inside the group on purpose: the probe wires the pointer into this
+          topology, so it has to share the transform the topology is drawn
+          with or its lines would miss the nodes they are reaching for. */}
+      {probe ? <PointerProbe topology={topology} /> : null}
     </group>
   );
 }

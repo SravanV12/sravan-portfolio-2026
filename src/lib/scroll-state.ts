@@ -32,6 +32,15 @@ export const scrollState = {
    * environment even when it lands on something that does nothing else.
    */
   impulse: 0,
+  /**
+   * The live shockwave, 1 at the moment of a press and decaying to 0.
+   *
+   * Published by the graph, which owns the decay, and read by the layers that
+   * answer the same press — the embers, the camera kick, the grid flare. One
+   * value driving all of them is what makes a click read as a single event
+   * rather than as several effects that happen to fire together.
+   */
+  shock: 0,
 };
 
 export type ScrollState = typeof scrollState;
