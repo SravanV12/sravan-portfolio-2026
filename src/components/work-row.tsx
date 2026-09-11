@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
-import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useCallback, useRef } from "react";
+import { useTilt } from "@/hooks/useTilt";
+import { scrollState } from "@/lib/scroll-state";
 import {
   caseStudyTransitionName,
   withViewTransition,
@@ -15,11 +14,10 @@ import type { CaseStudyCard } from "@/sanity/types";
 /**
  * One row of the work index.
  *
- * On a fine pointer the row tilts fractionally towards the cursor and a light
- * follows it across the surface, so the list has depth without becoming a grid
- * of cards. The tilt is deliberately tiny — a degree and a half — because the
- * row is a link before it is an effect, and text that swings around is harder
- * to read and harder to click.
+ * Pointing at a row does two things: the row itself tilts and lifts towards
+ * the cursor, and the system graph behind the page lights up and pushes
+ * traffic through it. That second part is the point — the environment is
+ * reacting to the work rather than running independently of it.
  *
  * Everything here is additive. With no JavaScript, reduced motion, or a touch
  * device, this is exactly the anchor and text it was before.
@@ -37,72 +35,48 @@ function ordinal(index: number) {
 export function WorkRow({ item, index }: Props) {
   const ref = useRef<HTMLAnchorElement>(null);
   const router = useRouter();
-  const reducedMotion = useReducedMotion();
-  const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)");
 
-  useIsomorphicLayoutEffect(() => {
-    const element = ref.current;
-    if (!element || reducedMotion || !finePointer) return;
+  // Drives the light sweep in CSS, so that paint stays on the compositor.
+  const handleMove = useCallback((x: number, y: number) => {
+    const node = ref.current;
+    if (!node) return;
+    node.style.setProperty("--x", `${x * 100}%`);
+    node.style.setProperty("--y", `${y * 100}%`);
+  }, []);
 
-    let cancelled = false;
-    let cleanup: (() => void) | undefined;
+  const handleEnter = useCallback(() => {
+    scrollState.focus = index;
+  }, [index]);
 
-    import("@/lib/gsap")
-      .then(({ gsap }) => {
-        if (cancelled || !ref.current) return;
-        const node = ref.current;
+  const handleLeave = useCallback(() => {
+    // Only clear if this row is still the one holding focus: moving between
+    // adjacent rows fires the leave of one after the enter of the next.
+    if (scrollState.focus === index) scrollState.focus = null;
+  }, [index]);
 
-        const rotX = gsap.quickTo(node, "rotationX", {
-          duration: 0.6,
-          ease: "power3.out",
-        });
-        const rotY = gsap.quickTo(node, "rotationY", {
-          duration: 0.6,
-          ease: "power3.out",
-        });
-
-        const onMove = (event: PointerEvent) => {
-          const box = node.getBoundingClientRect();
-          const px = (event.clientX - box.left) / box.width;
-          const py = (event.clientY - box.top) / box.height;
-          rotY((px - 0.5) * 3);
-          rotX((0.5 - py) * 1.5);
-          // Drives the light sweep in CSS, so the paint stays on the compositor.
-          node.style.setProperty("--x", `${px * 100}%`);
-          node.style.setProperty("--y", `${py * 100}%`);
-        };
-
-        const onLeave = () => {
-          rotX(0);
-          rotY(0);
-        };
-
-        node.addEventListener("pointermove", onMove);
-        node.addEventListener("pointerleave", onLeave);
-        node.addEventListener("blur", onLeave, true);
-
-        cleanup = () => {
-          node.removeEventListener("pointermove", onMove);
-          node.removeEventListener("pointerleave", onLeave);
-          node.removeEventListener("blur", onLeave, true);
-          gsap.set(node, { rotationX: 0, rotationY: 0 });
-        };
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-      cleanup?.();
-    };
-  }, [reducedMotion, finePointer]);
+  useTilt(ref, {
+    maxY: 7,
+    maxX: 4,
+    lift: 22,
+    onMove: handleMove,
+    onEnter: handleEnter,
+    onLeave: handleLeave,
+  });
 
   return (
     <Link
       ref={ref}
       href={`/work/${item.slug}`}
       onClick={(event) => {
-        // Let modified clicks (new tab, download) behave normally.
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+        // Let modified clicks (new tab, background tab) behave normally.
+        if (
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.button !== 0
+        ) {
+          return;
+        }
         const handled = withViewTransition(() => {
           router.push(`/work/${item.slug}`);
         });
@@ -115,8 +89,8 @@ export function WorkRow({ item, index }: Props) {
       </span>
 
       <div className="lg:col-span-7">
-        {/* The browser pairs this with the heading on the case study page
-            and animates between the two positions itself. */}
+        {/* The browser pairs this with the heading on the case study page and
+            animates between the two positions itself. */}
         <h3
           className="text-h2 group-hover:text-accent transition-colors"
           style={{

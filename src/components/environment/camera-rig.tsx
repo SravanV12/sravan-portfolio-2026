@@ -24,16 +24,21 @@ export function CameraRig() {
     const { camera } = state;
     const ease = Math.min(delta * 2.2, 1);
 
-    const targetX = (scrollState.pointerX - 0.5) * 1.1;
-    const targetY = (scrollState.pointerY - 0.5) * 0.7 + scrollState.progress * 1.6;
-    const targetZ = 5 - scrollState.progress * 2.2;
+    // Wider than it was. Scrolling now travels a real distance through the
+    // scene rather than nudging the view, and focusing a row pulls the lens
+    // in another notch so the system fills more of the frame.
+    const pull = scrollState.energy * 0.9;
+    const targetX = (scrollState.pointerX - 0.5) * 1.8;
+    const targetY =
+      (scrollState.pointerY - 0.5) * 1.1 + scrollState.progress * 2.6;
+    const targetZ = 5.4 - scrollState.progress * 4.2 - pull;
 
     camera.position.x += (targetX - camera.position.x) * ease;
     camera.position.y += (targetY - camera.position.y) * ease;
     camera.position.z += (targetZ - camera.position.z) * ease;
 
     // Bank into fast scrolling, then settle.
-    const targetRoll = -scrollState.velocity * 0.05;
+    const targetRoll = -scrollState.velocity * 0.075;
     camera.rotation.z += (targetRoll - camera.rotation.z) * ease;
 
     // Always looking slightly ahead of where the reader is, rather than

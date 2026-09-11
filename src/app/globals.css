@@ -179,3 +179,84 @@
     animation: none !important;
   }
 }
+
+@layer components {
+  /*
+    Skill cards share one vanishing point, the same way the work rows do, so
+    the About grid tilts as a surface rather than as nine separate cards.
+  */
+  .skill-grid {
+    perspective: 1200px;
+  }
+
+  .skill-card {
+    transform-style: preserve-3d;
+  }
+}
+
+@layer components {
+  /*
+    The sweep used by ProseReveal. `--sweep` runs 0 to 1; the extra 3em on each
+    end is the softness of the edge, so lines resolve over roughly two line
+    heights rather than snapping on at a hard boundary.
+
+    Applied only by script, and removed again when the sweep finishes: a mask
+    over text is a compositing layer, and leaving one in place permanently
+    would change how the glyphs antialias for no benefit.
+  */
+  .prose-sweep {
+    --sweep: 0;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 calc(var(--sweep) * (100% + 3em) - 3em),
+      transparent calc(var(--sweep) * (100% + 3em))
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 calc(var(--sweep) * (100% + 3em) - 3em),
+      transparent calc(var(--sweep) * (100% + 3em))
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prose-sweep {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+}
+
+/*
+  Architecture diagram. The hover highlight is CSS rather than script: React
+  only sets which boxes are dimmed, and the fading is left to the compositor.
+
+  Deliberately NOT inside a layer. The boxes carry Tailwind's `stroke-line`,
+  which lives in the utilities layer, and layer order beats specificity — a
+  rule in the components layer loses to it however tightly it is written, which
+  is why the accent stroke on a hovered box silently never applied. Unlayered
+  rules outrank every layer.
+*/
+.architecture g {
+  transition:
+    opacity 0.3s ease,
+    stroke 0.3s ease;
+}
+
+.architecture [data-dim] {
+  opacity: 0.22;
+}
+
+.architecture [data-node] rect {
+  transition: stroke 0.3s ease;
+}
+
+.architecture [data-on] rect {
+  stroke: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .architecture g,
+  .architecture [data-node] rect {
+    transition: none;
+  }
+}

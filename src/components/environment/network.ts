@@ -17,14 +17,21 @@ export type Topology = {
   tiers: Float32Array;
   /** Per-node phase offset so pulses are not synchronised. */
   seeds: Float32Array;
+  /** Which cluster each node belongs to, used to answer hover on a work row. */
+  clusters: Float32Array;
   /** Edge endpoints, flat xyz pairs, ready for LineSegments. */
   edgePositions: Float32Array;
   /** Per-edge-vertex position along its edge, 0 at the start and 1 at the end. */
   edgeT: Float32Array;
+  /** Per-edge-vertex ordinal in 0..1, so edges can be drawn in sequence. */
+  edgeOrder: Float32Array;
+  /** Per-edge-vertex cluster. */
+  edgeCluster: Float32Array;
   /** Packet start points, one per packet. */
   packetStart: Float32Array;
   packetEnd: Float32Array;
   packetSeed: Float32Array;
+  packetCluster: Float32Array;
   edgeCount: number;
 };
 
@@ -39,11 +46,16 @@ function makeRandom(seed: number) {
   };
 }
 
-export function buildTopology(nodeCount: number, linksPerNode = 2): Topology {
+export function buildTopology(
+  nodeCount: number,
+  linksPerNode = 2,
+  clusterCount = 6,
+): Topology {
   const random = makeRandom(0x51573a);
   const nodes = new Float32Array(nodeCount * 3);
   const tiers = new Float32Array(nodeCount);
   const seeds = new Float32Array(nodeCount);
+  const clusters = new Float32Array(nodeCount);
 
   // Loose tiers along Z: a front rank, a middle, and a distant one. Real
   // architecture diagrams have layers, and the depth is what makes the camera
@@ -61,6 +73,9 @@ export function buildTopology(nodeCount: number, linksPerNode = 2): Topology {
 
     tiers[i] = tier / 2;
     seeds[i] = random();
+    // Contiguous blocks rather than a random assignment, so a highlighted
+    // cluster reads as one region of the system lighting up.
+    clusters[i] = Math.floor((i / nodeCount) * clusterCount);
   }
 
   // Connect each node to its nearest neighbours, skipping pairs already
@@ -92,9 +107,12 @@ export function buildTopology(nodeCount: number, linksPerNode = 2): Topology {
   const edgeCount = pairs.length;
   const edgePositions = new Float32Array(edgeCount * 6);
   const edgeT = new Float32Array(edgeCount * 2);
+  const edgeOrder = new Float32Array(edgeCount * 2);
+  const edgeCluster = new Float32Array(edgeCount * 2);
   const packetStart = new Float32Array(edgeCount * 3);
   const packetEnd = new Float32Array(edgeCount * 3);
   const packetSeed = new Float32Array(edgeCount);
+  const packetCluster = new Float32Array(edgeCount);
 
   pairs.forEach(([a, b], e) => {
     for (let axis = 0; axis < 3; axis++) {
@@ -105,6 +123,12 @@ export function buildTopology(nodeCount: number, linksPerNode = 2): Topology {
     }
     edgeT[e * 2] = 0;
     edgeT[e * 2 + 1] = 1;
+    const order = e / Math.max(edgeCount - 1, 1);
+    edgeOrder[e * 2] = order;
+    edgeOrder[e * 2 + 1] = order;
+    edgeCluster[e * 2] = clusters[a];
+    edgeCluster[e * 2 + 1] = clusters[a];
+    packetCluster[e] = clusters[a];
     packetSeed[e] = random();
   });
 
@@ -112,11 +136,15 @@ export function buildTopology(nodeCount: number, linksPerNode = 2): Topology {
     nodes,
     tiers,
     seeds,
+    clusters,
     edgePositions,
     edgeT,
+    edgeOrder,
+    edgeCluster,
     packetStart,
     packetEnd,
     packetSeed,
+    packetCluster,
     edgeCount,
   };
 }

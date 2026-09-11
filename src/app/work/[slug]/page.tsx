@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArchitectureFigure } from "@/components/architecture-figure";
 import { Container } from "@/components/container";
 import { KineticText } from "@/components/kinetic-text";
 import { PlatformSection } from "@/components/platform-section";
@@ -126,12 +127,9 @@ export default async function CaseStudyPage({
               >
                 <h2 className="text-mono text-muted uppercase">Architecture</h2>
                 <h3 className="text-h3 mt-6">{caseStudy.diagram.title}</h3>
-                {/* The animated figure is built in step 09. Until then the alt
-                    text carries the meaning, which is what a screen reader
-                    receives either way. */}
-                <p className="text-body text-muted mt-4 max-w-[68ch]">
-                  {caseStudy.diagram.altText}
-                </p>
+                <div className="mt-8">
+                  <ArchitectureFigure diagram={caseStudy.diagram} />
+                </div>
               </Reveal>
             ) : null}
           </div>

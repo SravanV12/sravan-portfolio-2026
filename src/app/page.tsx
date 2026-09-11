@@ -3,7 +3,9 @@ import { Container } from "@/components/container";
 import { KineticText } from "@/components/kinetic-text";
 import { Magnetic } from "@/components/magnetic";
 import { PortableText } from "@/components/portable-text";
+import { ProseReveal } from "@/components/prose-reveal";
 import { Reveal } from "@/components/reveal";
+import { SkillCard } from "@/components/skill-card";
 import { WorkRow } from "@/components/work-row";
 import { DURATION, STAGGER } from "@/lib/motion";
 import { sanityFetch } from "@/sanity/fetch";
@@ -105,10 +107,14 @@ export default async function HomePage() {
 
           <div className="lg:col-span-9">
             <Reveal variant="slide-right" duration={DURATION.slow}>
-              <PortableText
-                value={profile?.intro}
-                className="text-h3 max-w-[38ch] font-normal"
-              />
+              {/* The intro resolves line by line as it is read, rather than
+                  arriving as one block. */}
+              <ProseReveal>
+                <PortableText
+                  value={profile?.intro}
+                  className="text-h3 max-w-[38ch] font-normal"
+                />
+              </ProseReveal>
             </Reveal>
 
             {profile?.skillGroups?.length ? (
@@ -116,17 +122,10 @@ export default async function HomePage() {
                 as="dl"
                 variant="scale"
                 stagger={STAGGER.tight}
-                className="border-line mt-20 grid gap-10 border-t pt-12 sm:grid-cols-2 lg:grid-cols-3"
+                className="skill-grid border-line mt-20 grid gap-10 border-t pt-12 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {profile.skillGroups.map((group) => (
-                  <div key={group._key}>
-                    <dt className="text-mono text-muted uppercase">
-                      {group.label}
-                    </dt>
-                    <dd className="text-body mt-4">
-                      {group.items?.join(", ")}
-                    </dd>
-                  </div>
+                  <SkillCard key={group._key} group={group} />
                 ))}
               </Reveal>
             ) : null}

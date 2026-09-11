@@ -128,6 +128,13 @@ export function EnvironmentLayer() {
       scrollState.pointerY = 1 - event.clientY / window.innerHeight;
     };
 
+    // Every press sends a wave through the system. Listening on the window
+    // rather than on any control means the environment answers the gesture
+    // itself, including presses that land on nothing.
+    const onPointerDown = () => {
+      scrollState.impulse = 1;
+    };
+
     // Decay velocity even when scrolling stops, so the field settles.
     const decay = () => {
       velocity *= 0.94;
@@ -138,6 +145,7 @@ export function EnvironmentLayer() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown, { passive: true });
     frame = requestAnimationFrame(decay);
 
     // Which section holds the viewport. An observer rather than measuring in
@@ -165,6 +173,7 @@ export function EnvironmentLayer() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerDown);
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
