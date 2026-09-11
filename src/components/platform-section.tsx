@@ -28,6 +28,29 @@ import type { Platform } from "@/sanity/types";
  * length is reserved in CSS (`height: N * 100svh`), so nothing shifts either.
  */
 
+/**
+ * Timeline units for one transition, and for the rest between transitions.
+ *
+ * The track used to be a single constant-velocity tween across the whole
+ * range, which meant no panel was ever *at rest* — each one was precisely
+ * composed at one instant and sliding at every other. Measured, every panel
+ * held its position for about 1% of the scroll range.
+ *
+ * That was invisible for the middle panels, because something readable is
+ * always near the centre of the frame while the track moves. It was not
+ * invisible for the last one: its single composed instant falls at 100% of the
+ * range, which is the last pixel before the sticky child releases, and `scrub`
+ * lag means the track is still catching up when that happens. The result was
+ * the final platform's description permanently overhanging the clip and being
+ * cut off mid-word.
+ *
+ * So the track now steps: move, rest, move, rest. The rests are what make each
+ * panel somewhere the reader arrives rather than somewhere the track passes
+ * through.
+ */
+const PANEL_MOVE = 0.7;
+const PANEL_DWELL = 0.5;
+
 type Props = {
   platforms: Platform[];
 };
@@ -74,26 +97,44 @@ export function PlatformSection({ platforms }: Props) {
             },
           });
 
-          // The track is N panels wide and slides left by N-1 of them, so
+          // The track is N panels wide and steps left one panel at a time, so
           // scrolling down walks sideways through the platforms. The document
           // itself never scrolls horizontally — this is a transform inside a
           // clipped box, which is what keeps the page's overflow guarantee.
-          timeline.to(
-            track,
-            {
-              xPercent: (-100 * (panels.length - 1)) / panels.length,
-              ease: "none",
-              duration: panels.length - 1,
-            },
-            0,
-          );
+          //
+          // One tween per transition rather than one tween across the whole
+          // range, with a gap between them. The gaps are the dwell.
+          const step = 100 / panels.length;
 
-          // Indicator follows the same clock.
+          // Opening rest, so the first panel is settled before anything moves.
+          let at = PANEL_DWELL;
+
           for (let i = 1; i < panels.length; i++) {
+            timeline.to(
+              track,
+              {
+                xPercent: -step * i,
+                // Eased rather than linear: the track now arrives somewhere
+                // and stops, and a constant velocity into a dead stop reads
+                // as a stall rather than as settling.
+                ease: "power2.inOut",
+                duration: PANEL_MOVE,
+              },
+              at,
+            );
+
+            // Indicator follows the same clock.
             timeline
-              .to(dots[i - 1], { opacity: 0.3, duration: 1 }, i - 1)
-              .to(dots[i], { opacity: 1, duration: 1 }, i - 1);
+              .to(dots[i - 1], { opacity: 0.3, duration: PANEL_MOVE }, at)
+              .to(dots[i], { opacity: 1, duration: PANEL_MOVE }, at);
+
+            at += PANEL_MOVE + PANEL_DWELL;
           }
+
+          // Closing rest. Without an explicit tween the timeline would end on
+          // the last move and the final panel would get no dwell at all, which
+          // is the whole fault this is here to prevent.
+          timeline.to({}, { duration: PANEL_DWELL }, at - PANEL_DWELL);
 
           // Fonts change line heights, which changes where the pin should
           // start. Re-measure once they have settled.
@@ -146,7 +187,10 @@ export function PlatformSection({ platforms }: Props) {
       <div
         ref={wrapRef}
         className="relative mt-8"
-        style={{ height: `${platforms.length * 100}svh` }}
+        // Half a viewport more than the panel count. The stepped timeline needs
+        // a little more room than the old continuous slide so the dwells are
+        // long enough to read in, without making the section a chore to get past.
+        style={{ height: `${(platforms.length + 0.5) * 100}svh` }}
       >
         <div
           ref={pinRef}
