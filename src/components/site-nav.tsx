@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -10,7 +10,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * The site's only navigation.
  *
  * Three things in one small bar: where you are, how far through you are, and
- * how to get somewhere else. It is deliberately minimal — a portfolio with a
+ * how to get somewhere else. It is deliberately minimal: a portfolio with a
  * heavy chrome competes with the work it is presenting.
  *
  * The active marker is a single element that slides between labels rather than
@@ -20,16 +20,27 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  *
  * Everything degrades: with JavaScript off the links are plain anchors, the
  * progress line simply sits at zero, and the marker parks under the first
- * item. With reduced motion nothing slides — the marker jumps.
+ * item. With reduced motion nothing slides, the marker jumps.
  */
 
 const SECTIONS = [
   { id: "work", label: "Work" },
   { id: "about", label: "About" },
+  { id: "education", label: "Education" },
   { id: "contact", label: "Contact" },
 ] as const;
 
-export function SiteNav() {
+type SectionId = (typeof SECTIONS)[number]["id"];
+
+export function SiteNav({ hide = [] }: { hide?: SectionId[] }) {
+  // Keyed on the contents rather than the array identity: the caller passes a
+  // literal, so a new array arrives on every render and memoising on the array
+  // itself would rebuild the list each time and retrigger both effects below.
+  const hideKey = hide.join(",");
+  const sections = useMemo(
+    () => SECTIONS.filter((s) => !hideKey.split(",").includes(s.id)),
+    [hideKey],
+  );
   const pathname = usePathname();
   const onHome = pathname === "/";
   const reducedMotion = useReducedMotion();
@@ -80,7 +91,7 @@ export function SiteNav() {
       return;
     }
 
-    const elements = SECTIONS.map((s) => document.getElementById(s.id)).filter(
+    const elements = sections.map((s) => document.getElementById(s.id)).filter(
       (el): el is HTMLElement => el !== null,
     );
     if (elements.length === 0) return;
@@ -96,7 +107,7 @@ export function SiteNav() {
 
     for (const el of elements) observer.observe(el);
     return () => observer.disconnect();
-  }, [onHome]);
+  }, [onHome, sections]);
 
   // Move the marker under whichever label is current.
   useIsomorphicLayoutEffect(() => {
@@ -104,7 +115,7 @@ export function SiteNav() {
     const marker = markerRef.current;
     if (!list || !marker) return;
 
-    const index = SECTIONS.findIndex((s) => s.id === active);
+    const index = sections.findIndex((s) => s.id === active);
     // Query the items, not the children: the marker is itself a child of this
     // list, so indexing children put the underline one place to the left of
     // wherever it belonged.
@@ -118,7 +129,7 @@ export function SiteNav() {
     marker.style.width = `${item.offsetWidth}px`;
     marker.style.transform = `translateX(${item.offsetLeft}px)`;
     marker.style.opacity = active ? "1" : "0";
-  }, [active, reducedMotion]);
+  }, [active, reducedMotion, sections]);
 
   return (
     <nav
@@ -156,7 +167,7 @@ export function SiteNav() {
               aria-hidden="true"
               className="bg-accent absolute -bottom-1 left-0 h-px w-0 opacity-0"
             />
-            {SECTIONS.map((section) => (
+            {sections.map((section) => (
               <li key={section.id}>
                 <Link
                   href={`/#${section.id}`}

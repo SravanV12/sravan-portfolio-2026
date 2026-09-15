@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
  * Abstract outlines standing in for a browser, a desktop window and a phone.
  *
  * Deliberately empty inside. PAAS is client work, so there are no product
- * screenshots and nothing here may resemble the real interface — these are
+ * screenshots and nothing here may resemble the real interface. These are
  * shapes that say "this shipped on three surfaces", not mock UI.
  *
  * Everything is drawn from `line`, `surface` and `muted` tokens.
@@ -40,7 +40,7 @@ function Dots() {
   );
 }
 
-/** Suggestion of content. Bars, not text — nothing readable, nothing real. */
+/** Suggestion of content. Bars, not text: nothing readable, nothing real. */
 function Bars({ rows = 4 }: { rows?: number }) {
   const widths = ["w-4/5", "w-3/5", "w-11/12", "w-2/5", "w-3/4", "w-1/2"];
   return (

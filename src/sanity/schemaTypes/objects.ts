@@ -168,3 +168,57 @@ export const diagramEdge = defineType({
     },
   },
 });
+
+/**
+ * One qualification. Ordered newest first by the editor, not by a date field:
+ * education is short enough that dragging three items beats maintaining a sort
+ * key, and study dates are often ranges or approximate.
+ */
+export const educationEntry = defineType({
+  name: "educationEntry",
+  title: "Education entry",
+  type: "object",
+  fields: [
+    defineField({
+      name: "qualification",
+      title: "Qualification",
+      type: "string",
+      description: "The degree or certificate. For example: B.Tech, Computer Science.",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "institution",
+      title: "Institution",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "timeframe",
+      title: "Timeframe",
+      type: "string",
+      description: "For example: 2015 to 2019.",
+    }),
+    defineField({
+      name: "location",
+      title: "Location",
+      type: "string",
+    }),
+    defineField({
+      name: "result",
+      title: "Result",
+      type: "string",
+      description: "Grade, class or CGPA. Optional, and fine to leave blank.",
+    }),
+    defineField({
+      name: "notes",
+      title: "Highlights",
+      type: "array",
+      of: [defineArrayMember({ type: "string" })],
+      description:
+        "Achievements, honours, relevant coursework. Keep each one short.",
+    }),
+  ],
+  preview: {
+    select: { title: "qualification", subtitle: "institution" },
+  },
+});

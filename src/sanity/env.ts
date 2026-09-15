@@ -3,7 +3,7 @@
  * a missing variable fails loudly at startup rather than as a confusing
  * runtime error later.
  *
- * Only NEXT_PUBLIC_ values belong in this file — it is imported by the Studio,
+ * Only NEXT_PUBLIC_ values belong in this file. It is imported by the Studio,
  * which runs in the browser.
  */
 

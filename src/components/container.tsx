@@ -2,7 +2,7 @@ import { createElement } from "react";
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 
 type ContainerProps = {
-  /** Render as a semantic element where one is warranted — section, main, footer. */
+  /** Render as a semantic element where one is warranted: section, main, footer. */
   as?: ElementType;
   className?: string;
   children: ReactNode;

@@ -4,13 +4,13 @@ import type { DiagramEdge, DiagramNode } from "@/sanity/types";
  * Turns the CMS's grid coordinates into SVG geometry.
  *
  * Kept apart from the component on purpose. The editor positions a node by
- * column and row — never in pixels — so all the arithmetic that turns those
+ * column and row, never in pixels, so all the arithmetic that turns those
  * into a drawing lives in one place, and the component is left to do nothing
  * but render what it is handed.
  *
  * There are two arrangements of the same diagram, not one drawing that shrinks.
  * A diagram has a size below which its labels stop being readable, and an SVG
- * scaled to fit a phone crosses that line immediately — so on a narrow screen
+ * scaled to fit a phone crosses that line immediately, so on a narrow screen
  * the same nodes are re-laid-out into a single column and the edges are
  * recomputed to match. Nothing is clipped and nothing is scrolled sideways.
  */
@@ -112,8 +112,8 @@ export function layoutDiagram(
 ): Layout {
   const usable = rawNodes.filter((node) => node.id && node.label);
 
-  // Stacking follows the authored grid in reading order — down each row, then
-  // across — so the sequence a reader sees is the one the editor laid out.
+  // Stacking follows the authored grid in reading order, down each row and
+  // then across, so the sequence a reader sees is the one the editor laid out.
   const ordered = stacked
     ? [...usable].sort(
         (a, b) =>
@@ -216,7 +216,7 @@ export function describeDiagram(layout: Layout) {
     const to = names.get(edge.to) ?? edge.to;
     const link = edge.bidirectional ? "is connected both ways to" : "connects to";
     return edge.label
-      ? `${from} ${link} ${to} — ${edge.label}.`
+      ? `${from} ${link} ${to}, carrying ${edge.label}.`
       : `${from} ${link} ${to}.`;
   });
 }

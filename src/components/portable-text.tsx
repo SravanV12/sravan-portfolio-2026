@@ -12,7 +12,7 @@ import type {
  * Written by hand rather than pulling in @portabletext/react: the schema
  * allows exactly one heading level, bold, italic, inline code, links and
  * bullet lists, which is little enough to render directly. If the schema grows
- * — nested lists, images, custom blocks — swap this for the library instead of
+ * (nested lists, images, custom blocks), swap this for the library instead of
  * growing it.
  */
 

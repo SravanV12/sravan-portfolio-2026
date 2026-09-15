@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { EnvironmentLayer } from "@/components/environment/environment-layer";
 import { SiteNav } from "@/components/site-nav";
+import { sanityFetch } from "@/sanity/fetch";
+import { NAV_SECTIONS_QUERY } from "@/sanity/queries";
 import { RouteTransition } from "@/components/route-transition";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import "./globals.css";
@@ -31,12 +33,17 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sravan V — Full-Stack Developer",
+  title: "Sravan V, Full-Stack Developer",
   description:
     "Full-stack developer building for web, mobile and desktop. Based in Palakkad, Kerala.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Build-time, in a server component, like every other query on the site.
+  // The nav must not offer a link to a section the page did not render.
+  const nav = await sanityFetch<{ hasEducation?: boolean } | null>(
+    NAV_SECTIONS_QUERY,
+  );
   return (
     <html
       lang="en"
@@ -48,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="bg-bg text-fg font-sans text-body flex min-h-full flex-col">
         <SmoothScroll />
         {/* Decorative background. Absent on mobile, with reduced motion, or
-            without WebGL — the page reads identically either way. */}
+            without WebGL. The page reads identically either way. */}
         <EnvironmentLayer />
         {/* Off-screen until focused, so a keyboard user can skip straight to
             the content instead of tabbing the whole page. */}
@@ -62,7 +69,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             their own, so the field shows through behind the type. The
             environment stays mounted across navigations, so the world carries
             on while only the content changes. */}
-        <SiteNav />
+        <SiteNav hide={nav?.hasEducation ? [] : ["education"]} />
         <RouteTransition>{children}</RouteTransition>
       </body>
     </html>

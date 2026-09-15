@@ -10,7 +10,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * Pulls its child a little way towards the pointer, and lets go when the
  * pointer leaves.
  *
- * This is a magnetic *element*, not a magnetic cursor — the real pointer is
+ * This is a magnetic *element*, not a magnetic cursor. The real pointer is
  * never hidden or replaced, which is the thing the project rules exclude. The
  * element still sits exactly where it was for hit-testing purposes at rest,
  * and the pull is small enough that a click never misses.

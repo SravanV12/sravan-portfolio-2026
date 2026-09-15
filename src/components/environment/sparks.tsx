@@ -83,7 +83,7 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-/** Deterministic PRNG (mulberry32) — see the note in `dust.tsx`. */
+/** Deterministic PRNG (mulberry32). See the note in `dust.tsx`. */
 function makeRandom(seed: number) {
   let state = seed;
   return () => {
@@ -158,7 +158,7 @@ export function Sparks({ count }: { count: number }) {
       progress.current = 0;
       const origin = u.uOrigin.value as Float32Array;
       // Roughly where the pointer is, pushed into the scene. It does not need
-      // to be an exact unprojection — it needs to be where the eye was.
+      // to be an exact unprojection. It needs to be where the eye was.
       origin[0] = (scrollState.pointerX - 0.5) * 13;
       origin[1] = (scrollState.pointerY - 0.5) * 7.5;
       origin[2] = -4.5;
@@ -173,8 +173,8 @@ export function Sparks({ count }: { count: number }) {
   return (
     <points frustumCulled={false} renderOrder={3}>
       <bufferGeometry>
-        {/* Unused by the shader — a spark's position is derived entirely from
-            its direction and the progress uniform — but three needs the
+        {/* Unused by the shader, since a spark's position is derived entirely
+            from its direction and the progress uniform, but three needs the
             attribute present to size the draw. */}
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         <bufferAttribute attach="attributes-aDir" args={[directions, 3]} />

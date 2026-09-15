@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
+import { EducationList } from "@/components/education-list";
 import { KineticText } from "@/components/kinetic-text";
 import { Magnetic } from "@/components/magnetic";
 import { PortableText } from "@/components/portable-text";
@@ -25,11 +26,12 @@ export default async function HomePage() {
       {/* Hero. Type carries this; there is nothing else in it. */}
       <Container
         as="section"
+        id="intro"
         className="flex min-h-svh flex-col justify-end pb-20 pt-32 sm:pb-28"
       >
         {/*
           The hero is deliberately NOT revealed. It is above the fold and its
-          headline is the LCP element — hiding it until GSAP loads moved LCP
+          headline is the LCP element. Hiding it until GSAP loads moved LCP
           from 2.3s to 2.9s, past the 2.5s budget, because the first paint then
           waits on JavaScript instead of just the webfont. Motion starts below
           the fold, where it costs nothing.
@@ -73,7 +75,7 @@ export default async function HomePage() {
         </p>
       </Container>
 
-      {/* Work index. Rows, not thumbnails — there are no screenshots. */}
+      {/* Work index. Rows, not thumbnails: there are no screenshots. */}
       <Container as="section" id="work" className="border-line border-t py-24 sm:py-32">
         <KineticText
           as="h2"
@@ -132,6 +134,31 @@ export default async function HomePage() {
           </div>
         </div>
       </Container>
+
+      {/* Education. Its own section rather than a footnote inside About: it
+          answers a question hiring managers ask directly, and burying it in a
+          paragraph makes it look like something being played down. */}
+      {profile?.education?.length ? (
+        <Container
+          as="section"
+          id="education"
+          className="border-line border-t py-24 sm:py-32"
+        >
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
+            <KineticText
+              as="h2"
+              text="Education"
+              className="text-mono text-muted block uppercase lg:col-span-3"
+            />
+
+            <div className="lg:col-span-9">
+              <Reveal variant="slide-up" stagger={STAGGER.base}>
+                <EducationList entries={profile.education} />
+              </Reveal>
+            </div>
+          </div>
+        </Container>
+      ) : null}
 
       {/* Contact. No form: it would need a backend and spam handling for
           nothing an email link does not already do. */}

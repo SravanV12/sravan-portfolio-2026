@@ -52,7 +52,7 @@ export default async function CaseStudyPage({
           ← Work
         </Link>
 
-        {/* Above the fold, so not revealed — same LCP reasoning as the hero. */}
+        {/* Above the fold, so not revealed. Same LCP reasoning as the hero. */}
         <header className="mt-16">
           <KineticText
             as="h1"
@@ -76,7 +76,7 @@ export default async function CaseStudyPage({
         </header>
 
         {/* Meta rail: sticky beside the prose on desktop, stacked above it on
-            mobile. Same markup, same order — no duplication to keep in sync. */}
+            mobile. Same markup, same order, no duplication to keep in sync. */}
         <div className="mt-20 grid gap-12 lg:grid-cols-12 lg:gap-8">
           <aside className="lg:col-span-3">
             <dl className="border-line grid gap-8 border-t pt-8 sm:grid-cols-2 lg:sticky lg:top-16 lg:block lg:space-y-8">

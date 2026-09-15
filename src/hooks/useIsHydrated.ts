@@ -2,13 +2,13 @@
 
 import { useSyncExternalStore } from "react";
 
-/** Nothing to subscribe to — the value is constant on each side. */
+/** Nothing to subscribe to. The value is constant on each side. */
 const noopSubscribe = () => () => {};
 
 /**
  * False during server rendering and the hydration pass, true afterwards.
  *
- * Used where the client renders something the server cannot — splitting a
+ * Used where the client renders something the server cannot, like splitting a
  * heading into per-character spans, for instance, where the server must emit
  * the plain string so the text survives with JavaScript disabled.
  *

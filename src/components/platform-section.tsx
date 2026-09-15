@@ -8,12 +8,12 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { Platform } from "@/sanity/types";
 
 /**
- * One product, three surfaces — pinned while the reader scrolls through them.
+ * One product, three surfaces, pinned while the reader scrolls through them.
  *
  * Pinning is used only where it behaves: desktop widths, motion allowed.
  * Below 1024px it is a plain stack. Mobile browsers resize the viewport as
  * their chrome hides and shows, which moves the ground under a pinned element
- * and makes it stutter — not worth fighting for a scroll effect.
+ * and makes it stutter. Not worth fighting for a scroll effect.
  *
  * The pinning is `position: sticky`, NOT ScrollTrigger's `pin`. That is a
  * deliberate departure from the step 08 instructions, forced by a crash:
@@ -32,7 +32,7 @@ import type { Platform } from "@/sanity/types";
  * Timeline units for one transition, and for the rest between transitions.
  *
  * The track used to be a single constant-velocity tween across the whole
- * range, which meant no panel was ever *at rest* — each one was precisely
+ * range, which meant no panel was ever *at rest*. Each one was precisely
  * composed at one instant and sliding at every other. Measured, every panel
  * held its position for about 1% of the scroll range.
  *
@@ -99,7 +99,7 @@ export function PlatformSection({ platforms }: Props) {
 
           // The track is N panels wide and steps left one panel at a time, so
           // scrolling down walks sideways through the platforms. The document
-          // itself never scrolls horizontally — this is a transform inside a
+          // itself never scrolls horizontally. This is a transform inside a
           // clipped box, which is what keeps the page's overflow guarantee.
           //
           // One tween per transition rather than one tween across the whole
@@ -163,7 +163,7 @@ export function PlatformSection({ platforms }: Props) {
             <div key={platform._key}>
               {/* No fixed height. The frames size themselves from their width
                   and aspect ratio, so pinning a height here meant they spilled
-                  out and landed on the heading below — measured at +53px on a
+                  out and landed on the heading below, measured at +53px on a
                   414px screen. */}
               <div className="mb-6 w-full max-w-[20rem]">
                 <DeviceFrame kind={frameKindFor(platform.label)} />
@@ -224,7 +224,7 @@ export function PlatformSection({ platforms }: Props) {
                   <h3 className="text-h2 mt-4">{platform.label}</h3>
                   {/* No character-based max width here. Each panel is one
                       viewport wide and split in two, so the grid column is
-                      already the measure — a 42ch cap was wider than the
+                      already the measure, and a 42ch cap was wider than the
                       column and the text was being clipped mid-word. */}
                   <p className="text-body text-muted mt-6">
                     {platform.description}

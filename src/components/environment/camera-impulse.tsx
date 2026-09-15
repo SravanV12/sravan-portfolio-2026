@@ -7,7 +7,7 @@ import { scrollState } from "@/lib/scroll-state";
 /**
  * Handheld feel, layered on top of the camera rig rather than replacing it.
  *
- * Two additions. A slow, irregular drift so the lens is never perfectly still —
+ * Two additions. A slow, irregular drift so the lens is never perfectly still:
  * a locked-off camera is the thing that most reliably makes a 3D scene read as
  * a screensaver. And a kick when the reader presses, so the frame itself
  * reacts, not only the things inside it.
@@ -16,7 +16,7 @@ import { scrollState } from "@/lib/scroll-state";
  * same priority run in registration order, so the rig positions the camera and
  * aims it, and this adds to the result afterwards. Rotation is the right place
  * to add: the rig finishes with `lookAt`, which overwrites the whole rotation,
- * so anything written before it would be discarded — and nudging position
+ * so anything written before it would be discarded, and nudging position
  * instead would be eased away by the rig on the following frame, because the
  * rig treats wherever the camera is as the value to ease from.
  *
@@ -31,7 +31,7 @@ export function CameraImpulse() {
     time.current += delta;
     const t = time.current;
 
-    // Squared, so the kick leaves hard and settles soft — the same shaping the
+    // Squared, so the kick leaves hard and settles soft, the same shaping the
     // graph's shockwave uses, so the two land as one event.
     const kick = scrollState.shock * scrollState.shock;
 

@@ -15,7 +15,7 @@ import {
  * Content arrives through depth when the route changes.
  *
  * The environment lives in the layout, not here, so it is never unmounted by a
- * navigation — the field, the graph and the camera carry straight on while the
+ * navigation. The field, the graph and the camera carry straight on while the
  * content changes in front of them. That continuity is what makes moving
  * between pages feel like moving within one place rather than loading another.
  *

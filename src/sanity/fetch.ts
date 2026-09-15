@@ -3,14 +3,14 @@ import { client } from "./client";
 /**
  * Stands in for the `server-only` package, which would turn a client-side
  * import into a build error. Adding a dependency needs approval, so this throws
- * at module load instead — the moment any client component pulls this in, the
+ * at module load instead: the moment any client component pulls this in, the
  * page breaks loudly in development rather than quietly shipping CMS content
  * and credentials to the browser.
  */
 if (typeof window !== "undefined") {
   throw new Error(
     "src/sanity/fetch.ts was imported in the browser. CMS content is fetched " +
-      "at build time in server components only — pass it down as props.",
+      "at build time in server components only. Pass it down as props.",
   );
 }
 
@@ -27,13 +27,13 @@ export const REVALIDATE_SECONDS = 3600;
  * Caching is deliberately left to the page's own ISR window rather than being
  * duplicated here. Passing `next: { revalidate, tags }` puts a second entry in
  * the Data Cache that outlives `revalidatePath`, so the page regenerates and
- * reads back the same stale response — verified: the route cache went
+ * reads back the same stale response. Verified: the route cache went
  * HIT → MISS → HIT while the content never changed. The Sanity client does not
  * forward Next cache tags, so the entry could not be dropped by tag either.
  * With no entry to go stale, regeneration always re-queries.
  *
  * The `server-only` package would make a client-side import a build error
- * rather than a review catch. It is not installed — adding it needs approval.
+ * rather than a review catch. It is not installed, and adding it needs approval.
  */
 export async function sanityFetch<T>(
   query: string,

@@ -1,7 +1,7 @@
 /**
  * The environment shader.
  *
- * Domain-warped noise — fbm whose input is itself displaced by fbm — which is
+ * Domain-warped noise, fbm whose input is itself displaced by fbm, which is
  * what makes it read as moving fluid rather than as a scrolling texture. On
  * top of that: a scroll-driven camera push, light streaks that sweep with the
  * page, and a colour temperature that travels through the palette as you
@@ -99,7 +99,7 @@ export const fragmentShader = /* glsl */ `
     float glow = pow(core, 2.2);
 
     // Streaks: thin, fast-moving highlights that read as light through haze.
-    // Reuses the field rather than sampling fresh noise — a cheap trick that
+    // Reuses the field rather than sampling fresh noise, a cheap trick that
     // looks the same because the streaks sit inside the same structure.
     float streak = pow(
       smoothstep(0.55, 1.0, fract(field * 3.0 + p.y * 1.6 - travel * 1.2)),
@@ -128,9 +128,9 @@ export const fragmentShader = /* glsl */ `
     colour += uAccent * uVelocity * 0.06 * glow;
 
     // The ceiling. Text sits on top of this, and the contrast ratios in the
-    // palette assume a near-black ground — so the environment is not allowed
+    // palette assume a near-black ground, so the environment is not allowed
     // to climb past a dim wash however the terms above happen to land.
-    // 0.18 is not a taste value — it is the brightest this may go while
+    // 0.18 is not a taste value. It is the brightest this may go while
     // secondary text still clears 4.5:1 against it. At 0.34 that ratio fell to
     // 1.81:1, which no automated audit catches because Lighthouse reads CSS
     // colours, not canvas pixels. Raising this means re-checking the palette.

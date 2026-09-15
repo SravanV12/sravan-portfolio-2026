@@ -74,7 +74,7 @@ export function KineticText({
         if (cancelled || !ref.current) return;
         const node = ref.current;
         const chars = node.querySelectorAll("[data-char]");
-        // In focus mode the element itself is the target — there are no
+        // In focus mode the element itself is the target. There are no
         // character spans, by design.
         const targets = mode === "focus" ? [node] : Array.from(chars);
         if (targets.length === 0) return;
@@ -124,7 +124,7 @@ export function KineticText({
 
   // `focus` mode never splits. Blurring the whole block is visually identical
   // to blurring each character, and splitting meant carrying a duplicate copy
-  // of the text for assistive technology — which also duplicated it on copy
+  // of the text for assistive technology, which also duplicated it on copy
   // and paste. One copy of the words, always.
   if (!split || mode === "focus") {
     return (
@@ -137,7 +137,7 @@ export function KineticText({
   return (
     // `mask` mode is for headings, where aria-label is valid. The split
     // characters are hidden from assistive technology and the label carries
-    // the real text — no second copy in the DOM.
+    // the real text, so there is no second copy in the DOM.
     <Tag ref={ref} className={className} style={style} aria-label={text}>
       {text.split(" ").map((word, wordIndex, words) => (
         <span

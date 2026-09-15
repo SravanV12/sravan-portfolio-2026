@@ -4,7 +4,7 @@
  * The case study title on the index and the heading on the case study page
  * carry the same `view-transition-name`, so the browser treats them as one
  * object and animates between the two positions itself. No library, no
- * measuring, no cloned nodes — and in a browser without support the
+ * measuring, no cloned nodes, and in a browser without support the
  * navigation simply happens, which is the correct fallback.
  */
 

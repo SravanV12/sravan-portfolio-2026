@@ -10,7 +10,7 @@ import { scrollState } from "@/lib/scroll-state";
  *
  * Added underneath the existing scene rather than in place of any of it. The
  * system graph, the motes and the field all float in space with no ground, so
- * nothing in the frame told the eye how far away anything was — depth was
+ * nothing in the frame told the eye how far away anything was. Depth was
  * carried entirely by parallax between layers. A ruled plane converging towards
  * a vanishing point is the oldest and cheapest depth cue there is, and it turns
  * the same objects into a place with a floor under them.
@@ -18,8 +18,8 @@ import { scrollState } from "@/lib/scroll-state";
  * Two of them make a corridor, which is what gives the page its sense of moving
  * *through* something as it scrolls rather than past it.
  *
- * One draw call each, no geometry beyond a single quad, and everything — the
- * ruling, the travel, the pool of light — computed in the fragment stage.
+ * One draw call each, no geometry beyond a single quad, and everything (the
+ * ruling, the travel, the pool of light) computed in the fragment stage.
  */
 
 const gridVertex = /* glsl */ `
@@ -75,7 +75,7 @@ const gridFragment = /* glsl */ `
     float far = 1.0 - smoothstep(26.0, 72.0, vDist);
     float near = smoothstep(1.5, 10.0, vDist);
 
-    // A pool of light tracking the pointer — the one directional cue in the
+    // A pool of light tracking the pointer, the one directional cue in the
     // scene, and what stops the ruling reading as a flat printed texture.
     float pool = 1.0 - smoothstep(0.0, 18.0, length(vCoord - uPool));
     pool *= pool;
@@ -91,7 +91,7 @@ const gridFragment = /* glsl */ `
 
     // Colour unpremultiplied, with alpha carrying the whole modulation.
     // Three additive blending is (srcAlpha, one), so it already multiplies by
-    // alpha once — premultiplying here as well would square it, and at these
+    // alpha once, so premultiplying here as well would square it, and at these
     // alphas that is the difference between a visible floor and nothing.
     gl_FragColor = vec4(colour, alpha);
   }

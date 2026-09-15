@@ -11,7 +11,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  *
  * Lenis and GSAP are imported dynamically, inside the effect. Bundling them
  * with the first load put them in front of the webfont and pushed LCP from
- * 2.3s to 2.6s — nothing above the fold needs either library, so neither
+ * 2.3s to 2.6s. Nothing above the fold needs either library, so neither
  * belongs in the critical path.
  *
  * When reduced motion is on, they are never fetched at all. That setting then

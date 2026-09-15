@@ -5,6 +5,7 @@ import {
   caseStudySection,
   diagramEdge,
   diagramNode,
+  educationEntry,
   platform,
   skillGroup,
 } from "./objects";
@@ -26,4 +27,5 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   platform,
   diagramNode,
   diagramEdge,
+  educationEntry,
 ];

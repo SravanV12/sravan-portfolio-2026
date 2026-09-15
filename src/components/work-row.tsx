@@ -16,7 +16,7 @@ import type { CaseStudyCard } from "@/sanity/types";
  *
  * Pointing at a row does two things: the row itself tilts and lifts towards
  * the cursor, and the system graph behind the page lights up and pushes
- * traffic through it. That second part is the point — the environment is
+ * traffic through it. That second part is the point: the environment is
  * reacting to the work rather than running independently of it.
  *
  * Everything here is additive. With no JavaScript, reduced motion, or a touch

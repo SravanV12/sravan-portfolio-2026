@@ -19,7 +19,7 @@ import { scrollState } from "@/lib/scroll-state";
  * from z, so a single draw call covers the whole field.
  *
  * Points are cheap, but they are still overdraw on a full-screen additive
- * pass — the count is tuned for effect, not density, and drops on lower
+ * pass: the count is tuned for effect, not density, and drops on lower
  * quality tiers.
  */
 
@@ -65,7 +65,7 @@ const vertexShader = /* glsl */ `
 
     vDepth = aDepth;
     // Faint. This is an additive pass over the whole viewport, so alpha here
-    // accumulates fast — motes should read as specks of light, not snow.
+    // accumulates fast, so motes read as specks of light, not snow.
     vAlpha = mix(0.06, 0.30, aDepth);
   }
 `;
@@ -98,7 +98,7 @@ const fragmentShader = /* glsl */ `
 /**
  * Deterministic PRNG (mulberry32).
  *
- * `Math.random()` during render is impure — React's lint rules reject it, and
+ * `Math.random()` during render is impure. React's lint rules reject it, and
  * rightly: the same render would produce a different field each time. A fixed
  * seed also means the layout is identical on every load, so the scene is
  * reproducible when something looks wrong.

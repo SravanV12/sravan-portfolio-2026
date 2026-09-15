@@ -13,7 +13,7 @@
 export type Topology = {
   /** Node positions, flat xyz triples. */
   nodes: Float32Array;
-  /** Per-node tier, 0..1 — drives size and colour. */
+  /** Per-node tier, 0..1. Drives size and colour. */
   tiers: Float32Array;
   /** Per-node phase offset so pulses are not synchronised. */
   seeds: Float32Array;
@@ -79,7 +79,7 @@ export function buildTopology(
   }
 
   // Connect each node to its nearest neighbours, skipping pairs already
-  // joined. Nearest-neighbour wiring is what gives the graph structure — a
+  // joined. Nearest-neighbour wiring is what gives the graph structure. A
   // random pairing looks like string, not a system.
   const pairs: Array<[number, number]> = [];
   const seen = new Set<string>();

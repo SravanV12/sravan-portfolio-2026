@@ -16,6 +16,15 @@ export const PROFILE_QUERY = groq`
     linkedin,
     github,
     "resumeUrl": resumeFile.asset->url,
+    education[]{
+      _key,
+      qualification,
+      institution,
+      timeframe,
+      location,
+      result,
+      notes
+    },
     skillGroups[]{
       _key,
       label,
@@ -25,7 +34,20 @@ export const PROFILE_QUERY = groq`
 `;
 
 /**
- * Index cards only. Bodies are deliberately not projected — the index has no
+ * Just enough to decide whether the Education nav item should exist.
+ *
+ * Its own query rather than reusing the profile: this runs in the layout, on
+ * every route including the Studio, and pulling the whole profile plus its
+ * rich text through there to answer one boolean would be wasteful.
+ */
+export const NAV_SECTIONS_QUERY = groq`
+  *[_type == "profile"][0]{
+    "hasEducation": count(education) > 0
+  }
+`;
+
+/**
+ * Index cards only. Bodies are deliberately not projected: the index has no
  * use for them, and fetching them would pull the whole site's prose into a
  * page that never renders it.
  */

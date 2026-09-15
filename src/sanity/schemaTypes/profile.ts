@@ -57,6 +57,13 @@ export const profile = defineType({
       options: { accept: "application/pdf" },
     }),
     defineField({
+      name: "education",
+      title: "Education",
+      type: "array",
+      of: [defineArrayMember({ type: "educationEntry" })],
+      description: "Newest first. Shown as its own section on the home page.",
+    }),
+    defineField({
       name: "skillGroups",
       title: "Skill groups",
       type: "array",

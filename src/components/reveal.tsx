@@ -15,7 +15,7 @@ import {
 
 /**
  * The only reveal mechanism in the codebase. Anything that needs to enter on
- * scroll goes through this — variants get a prop, not a second implementation.
+ * scroll goes through this. Variants get a prop, not a second implementation.
  *
  * Two things here are deliberate and easy to undo by accident:
  *
@@ -26,7 +26,7 @@ import {
  *
  * 2. GSAP is imported dynamically. Keeping it out of the first load is what
  *    holds LCP down. If the import fails, the element is shown rather than
- *    left hidden — a missing animation is a far smaller problem than missing
+ *    left hidden. A missing animation is a far smaller problem than missing
  *    content.
  *
  * Nothing above the fold should use this. A reveal on the LCP element makes
@@ -40,7 +40,7 @@ import {
  * things force it: the WebGL layer augments the global JSX namespace with
  * Three's elements, which makes an unconstrained ElementType resolve its
  * children to `never`; and widening to every HTML tag instead produces a union
- * TypeScript reports as "too complex to represent". Runtime is unaffected —
+ * TypeScript reports as "too complex to represent". Runtime is unaffected:
  * React renders a string tag the same either way.
  */
 type TagProps = {
@@ -53,8 +53,8 @@ type TagProps = {
 type RevealProps = {
   as?: string;
   /**
-   * How it arrives. `depth` uses real perspective — the element comes from
-   * behind the page plane and rotates flat — so it is the one to reach for at
+   * How it arrives. `depth` uses real perspective: the element comes from
+   * behind the page plane and rotates flat, so it is the one to reach for at
    * the moments that should feel dimensional, not for every block.
    */
   variant?: RevealVariant;

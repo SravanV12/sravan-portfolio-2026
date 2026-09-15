@@ -25,8 +25,8 @@ type TiltOptions = {
  * cards should move by the same rules, and a single place to tune them is what
  * keeps the motion reading as one system.
  *
- * Skipped entirely on coarse pointers — there is no hover on a touchscreen, so
- * the listeners would be dead weight — and under reduced motion.
+ * Skipped entirely on coarse pointers, where there is no hover and the
+ * listeners would be dead weight, and under reduced motion.
  */
 export function useTilt(
   ref: RefObject<HTMLElement | null>,

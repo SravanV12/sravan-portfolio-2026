@@ -32,7 +32,7 @@ import { scrollState } from "@/lib/scroll-state";
  * writing does.
  *
  * Cost is bounded deliberately. Nodes are one instanced draw call, edges one
- * LineSegments, packets one Points — three draw calls for the whole system,
+ * LineSegments, packets one Points: three draw calls for the whole system,
  * with packet motion computed on the GPU from a per-packet seed so nothing is
  * animated on the main thread.
  */
@@ -162,21 +162,31 @@ const packetFragment = /* glsl */ `
 /**
  * Where the system sits while each section is being read, in world units.
  *
- * Indexed by section: hero, work, about, contact. Positive X is the right of
- * the frame. The values track this page's grid — the hero and the work list
- * are left-aligned, so the system stays right of them; About and Contact put
- * only a short label in the left column, so it can cross to that side.
+ * Keyed by section id rather than by position. Sections are conditional on
+ * their content existing, so an array indexed by order breaks the moment one
+ * of them is added or drops out: adding Education shifted everything after it
+ * and Contact inherited the wrong framing.
+ *
+ * Positive X is the right of the frame. The values track the page grid. The
+ * hero and the work list are left-aligned, so the system stays right of them.
+ * About, Education and Contact put only a short label in the left column, so
+ * it can cross to that side.
+ *
+ * Work is the awkward one: its rows run the full width of the page, title on
+ * the left and meta on the right, so there is no horizontal space to move
+ * into. Depth is the only free axis there, which is why it sits so much
+ * further back rather than simply further across.
  */
-// Work is the awkward one: its rows run the full width of the page — title on
-// the left, meta on the right — so there is no horizontal space to move into.
-// Depth is the only free axis there, which is why it sits so much further back
-// than the rest rather than simply further across.
-const SECTION_FRAMING = [
-  { x: 3.6, z: -2 }, // Hero: type occupies the left half.
-  { x: 5.2, z: -8.5 }, // Work: see the note above.
-  { x: -4.6, z: -3.5 }, // About: body copy is in the right nine columns.
-  { x: -4.4, z: -4 }, // Contact: same grid as About.
-];
+const SECTION_FRAMING: Record<string, { x: number; z: number }> = {
+  intro: { x: 3.6, z: -2 },
+  work: { x: 5.2, z: -8.5 },
+  about: { x: -4.6, z: -3.5 },
+  education: { x: -4.2, z: -3 },
+  contact: { x: -4.4, z: -4 },
+};
+
+/** Used for any section without its own entry, so the scene never jumps. */
+const DEFAULT_FRAMING = SECTION_FRAMING.intro;
 
 function tokenColour(name: string, fallback: string) {
   if (typeof window === "undefined") return new Color(fallback);
@@ -211,7 +221,7 @@ export function NetworkScene({
   const focus = useRef(-1);
   // -1 when idle; otherwise 0..1, the position of the sweeping band.
   const ripple = useRef(-1);
-  const lastSection = useRef(-1);
+  const lastSection = useRef("");
   const shock = useRef(0);
 
   const edgeUniforms = useMemo(
@@ -267,16 +277,16 @@ export function NetworkScene({
       scrollState.impulse = 0;
     }
     shock.current = Math.max(shock.current - delta * 1.8, 0);
-    // Published so the layers added around this one — embers, camera kick,
-    // grid flare — answer the same press on the same curve.
+    // Published so the layers added around this one (embers, camera kick,
+    // grid flare) answer the same press on the same curve.
     scrollState.shock = shock.current;
     // Eased rather than linear, so the wave leaves fast and settles slowly.
     const shockEased = shock.current * shock.current;
 
     // Arriving in a new section re-traces the wiring in the order it was first
     // drawn. Only after boot, so the two never run over one another.
-    if (boot.current >= 1 && scrollState.section !== lastSection.current) {
-      lastSection.current = scrollState.section;
+    if (boot.current >= 1 && scrollState.sectionId !== lastSection.current) {
+      lastSection.current = scrollState.sectionId;
       ripple.current = 0;
     }
     if (ripple.current >= 0) {
@@ -316,13 +326,9 @@ export function NetworkScene({
     // The framing is a table rather than arithmetic on the section index, and
     // that is the whole point: it has to match where the text actually sits.
     // Alternating sides by parity put the graph on the left through the work
-    // list, which is exactly where the case-study titles are — nodes landed on
-    // top of the words. Every entry below keeps the system clear of the column
-    // that section reads in, and the work list, whose rows span the full width,
-    // is pushed furthest back because nothing there is safe.
-    const framing = SECTION_FRAMING[
-      Math.min(scrollState.section, SECTION_FRAMING.length - 1)
-    ];
+    // list, which is exactly where the case-study titles are, and nodes landed
+    // on top of the words.
+    const framing = SECTION_FRAMING[scrollState.sectionId] ?? DEFAULT_FRAMING;
 
     // Focus pushes the system further out and lets the camera do the leaning
     // in. Moving it towards the reader instead would crowd the column at the
@@ -444,8 +450,8 @@ export function NetworkScene({
 
       <points frustumCulled={false}>
         <bufferGeometry>
-          {/* Position is unused by the shader — a packet's real location is
-              interpolated from its endpoints — but three needs the attribute
+          {/* Position is unused by the shader, since a packet's real location
+              is interpolated from its endpoints, but three needs the attribute
               to size the draw. */}
           <bufferAttribute
             attach="attributes-position"

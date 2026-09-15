@@ -30,7 +30,7 @@ export type PortableTextBlock = {
 };
 
 export type SkillGroup = {
-  /** Sanity's per-item key. Unique within the array — use it for React keys,
+  /** Sanity's per-item key. Unique within the array, so use it for React keys,
       never the label, which is optional and may repeat. */
   _key: string;
   label?: string;
@@ -46,6 +46,7 @@ export type Profile = {
   linkedin?: string;
   github?: string;
   resumeUrl?: string;
+  education?: EducationEntry[];
   skillGroups?: SkillGroup[];
 };
 
@@ -70,6 +71,16 @@ export type Platform = {
   _key: string;
   label?: string;
   description?: string;
+};
+
+export type EducationEntry = {
+  _key: string;
+  qualification?: string;
+  institution?: string;
+  timeframe?: string;
+  location?: string;
+  result?: string;
+  notes?: string[];
 };
 
 export type DiagramNode = {

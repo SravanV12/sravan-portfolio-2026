@@ -22,7 +22,7 @@ import type { ArchitectureDiagram } from "@/sanity/types";
  * It is a client component, but the SVG is complete in the server-rendered
  * HTML: every box, line and label is present before any script runs, so with
  * JavaScript off the diagram is a finished static drawing rather than an empty
- * frame. Script adds three things on top — the lines draw themselves in,
+ * frame. Script adds three things on top: the lines draw themselves in,
  * traffic runs along them, and pointing at a box dims everything it does not
  * touch.
  */
@@ -48,7 +48,7 @@ export function ArchitectureFigure({
   const reducedMotion = useReducedMotion();
   const [active, setActive] = useState<string | null>(null);
   // Markers are referenced by URL, so two diagrams on one page would otherwise
-  // share — and fight over — the same definition.
+  // share, and fight over, the same definition.
   const arrowId = `${useId()}-arrow`;
   const describedById = `${useId()}-desc`;
 
@@ -93,7 +93,7 @@ export function ArchitectureFigure({
           //
           // Every one of these tweens clears the opacity it set when it
           // finishes. The hover highlight dims a group through a CSS class,
-          // and an inline opacity left behind by GSAP outranks a stylesheet —
+          // and an inline opacity left behind by GSAP outranks a stylesheet,
           // so without this the diagram would animate in correctly and then
           // refuse to dim for the rest of the page's life.
           timeline.fromTo(
@@ -118,7 +118,7 @@ export function ArchitectureFigure({
 
           // The whole edge group fades, not just the path. Arrowheads are SVG
           // markers and markers ignore stroke-dasharray, so a fully dashed-out
-          // wire still paints its arrows — which left disembodied arrowheads
+          // wire still paints its arrows, which left disembodied arrowheads
           // and edge labels floating over an empty diagram until it scrolled
           // into view.
           gsap.set(edgeGroups, { opacity: 0 });

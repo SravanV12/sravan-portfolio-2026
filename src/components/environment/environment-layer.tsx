@@ -10,8 +10,8 @@ import { scrollState } from "@/lib/scroll-state";
  * Decides whether the environment runs at all, and keeps the shared scroll and
  * pointer state fed while it does.
  *
- * The scene is a background. It is allowed to be absent — on a phone, with
- * reduced motion, without WebGL, or before the chunk arrives — and the page
+ * The scene is a background. It is allowed to be absent: on a phone, with
+ * reduced motion, without WebGL, or before the chunk arrives. The page
  * must read exactly the same either way. Nothing here is content.
  */
 
@@ -25,7 +25,7 @@ const Scene = dynamic(
  *
  * Two questions, not one. WebGL being *available* is not the same as it being
  * *fast*: browsers fall back to a software rasteriser when there is no usable
- * GPU, and a full-screen animated shader on the CPU is ruinous — measured
+ * GPU, and a full-screen animated shader on the CPU is ruinous, measured
  * here at 2.5–4 seconds of main-thread blocking, with the performance score
  * falling from 99 to below 70.
  *
@@ -66,7 +66,7 @@ function shouldRunWebGL() {
 /**
  * How much scene this device should be asked to draw.
  *
- * Phones are not excluded — they get a cheaper tier rather than a blank
+ * Phones are not excluded. They get a cheaper tier rather than a blank
  * background. What is excluded is hardware that reports too few cores or too
  * little memory to run a full-screen shader without stealing frames from
  * scrolling, which matters far more than atmosphere does.
@@ -98,7 +98,7 @@ export function EnvironmentLayer() {
   // the background in and out is worse than not having it.
   const [tooSlow, setTooSlow] = useState(false);
   const [tier, setTier] = useState<"high" | "medium" | "low">("low");
-  // Phones now run the scene too, at a lower tier — only reduced motion and
+  // Phones now run the scene too, at a lower tier. Only reduced motion and
   // genuinely underpowered hardware opt out entirely.
   const wanted = !reducedMotion && !tooSlow;
   const enabled = capable && wanted;
@@ -161,6 +161,7 @@ export function EnvironmentLayer() {
           if (!entry.isIntersecting) continue;
           const index = sections.indexOf(entry.target as HTMLElement);
           if (index >= 0) scrollState.section = index;
+          if (entry.target.id) scrollState.sectionId = entry.target.id;
         }
       },
       // Fires when a section occupies the middle band of the screen, so the

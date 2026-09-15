@@ -21,7 +21,7 @@ import { scrollState } from "@/lib/scroll-state";
  *
  * It darkens and brightens in the same pass. With normal blending the output is
  * `src * a + dst * (1 - a)`, so a near-black source with a low alpha dims what
- * is behind it and an accent source with a low alpha lifts it — which means the
+ * is behind it and an accent source with a low alpha lifts it, which means the
  * vignette and the sweep can share one draw call instead of needing two passes
  * with opposite blend modes.
  *
@@ -105,7 +105,7 @@ export function Atmosphere() {
 
   // -1 when idle, otherwise 0..1 as the band crosses.
   const sweep = useRef(-1);
-  const lastSection = useRef(-1);
+  const lastSection = useRef("");
   const size = useMemo(() => new Vector2(), []);
 
   const uniforms = useMemo(
@@ -133,8 +133,8 @@ export function Atmosphere() {
 
     // Tracked here rather than shared, so this layer answers a section change
     // on its own terms and on its own timing.
-    if (scrollState.section !== lastSection.current) {
-      lastSection.current = scrollState.section;
+    if (scrollState.sectionId !== lastSection.current) {
+      lastSection.current = scrollState.sectionId;
       sweep.current = 0;
     }
     if (sweep.current >= 0) {

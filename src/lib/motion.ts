@@ -2,7 +2,7 @@
  * The motion vocabulary. One place for how things move, so the site reads as
  * a single system rather than a pile of independently tuned effects.
  *
- * Nothing here imports GSAP — these are plain values, so the module is free to
+ * Nothing here imports GSAP. These are plain values, so the module is free to
  * use anywhere without pulling the animation engine into a bundle.
  */
 
@@ -21,7 +21,7 @@ export const EASE = {
 } as const;
 
 /**
- * Durations, in seconds. Step sizes rather than a continuum — three lengths
+ * Durations, in seconds. Step sizes rather than a continuum: three lengths
  * used consistently look deliberate; a dozen arbitrary ones look accidental.
  */
 export const DURATION = {

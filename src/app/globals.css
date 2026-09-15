@@ -260,3 +260,79 @@
     transition: none;
   }
 }
+
+/*
+  Education rail. A line with nodes on it, using the same two marks the system
+  graph and the architecture diagrams use, so the section belongs to the same
+  visual language rather than looking like a CV block dropped in.
+
+  The rail is a pseudo-element on the list rather than a border on each item,
+  so it runs continuously past the gaps and can fade out at the bottom instead
+  of stopping with a hard edge.
+*/
+.education-rail {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.education-rail::before {
+  content: "";
+  position: absolute;
+  top: 0.55rem;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent) 0%,
+    var(--color-line) 22%,
+    var(--color-line) 68%,
+    transparent 100%
+  );
+}
+
+.education-entry {
+  position: relative;
+  padding-bottom: 3.5rem;
+}
+
+.education-entry:last-child {
+  padding-bottom: 0;
+}
+
+/*
+  The node. A rotated square, which is the silhouette the octahedra in the
+  background scene present head-on.
+*/
+.education-node {
+  position: absolute;
+  top: 0.4rem;
+  left: -2rem;
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    transform 0.35s ease;
+}
+
+.education-entry:first-child .education-node {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.education-entry:hover .education-node,
+.education-entry:focus-within .education-node {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  transform: rotate(45deg) scale(1.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .education-node {
+    transition: none;
+  }
+}

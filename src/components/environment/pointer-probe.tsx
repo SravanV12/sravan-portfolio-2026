@@ -27,7 +27,7 @@ import { scrollState } from "@/lib/scroll-state";
  * the lines land on the nodes exactly wherever the system has been moved to.
  *
  * The geometry is a fixed, small number of segments, rewritten in place every
- * frame. Nothing is allocated and nothing is re-created — the same buffer is
+ * frame. Nothing is allocated and nothing is re-created. The same buffer is
  * uploaded with new numbers in it.
  */
 
@@ -84,7 +84,7 @@ export function PointerProbe({ topology }: { topology: Topology }) {
   //
   // These are handed to Three once and never touched again from here. The
   // per-frame writes go through the geometry's own attributes instead, which is
-  // both the documented way to animate a BufferAttribute and the honest one —
+  // both the documented way to animate a BufferAttribute and the honest one:
   // after construction the buffer belongs to the geometry, not to this
   // component, and React is right to refuse mutation of a value a hook returned.
   const initial = useMemo(

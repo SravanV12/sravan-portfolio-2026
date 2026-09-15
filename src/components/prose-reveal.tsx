@@ -12,7 +12,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * text into per-line elements, and the reason is the content: this wraps CMS
  * rich text, which contains links, bold runs and inline code. A line splitter
  * has to cut the DOM at line boundaries, and those boundaries fall in the
- * middle of those elements — so splitting would either break the markup or
+ * middle of those elements, so splitting would either break the markup or
  * need to rebuild it, and would have to redo the whole thing on every resize
  * because the line boxes move.
  *

@@ -17,6 +17,14 @@ export const scrollState = {
   /** Index of the section currently filling most of the viewport. */
   section: 0,
   /**
+   * The id of that section, which is what the scene keys its framing off.
+   *
+   * An index is fragile here. Sections are conditional on their content
+   * existing, so adding Education shifted every index after it and Contact
+   * would silently have inherited the wrong framing. A name cannot drift.
+   */
+  sectionId: "intro",
+  /**
    * Which case study the reader is pointing at, or null.
    *
    * This is what ties the content to the environment: hovering a row lights up
@@ -36,7 +44,7 @@ export const scrollState = {
    * The live shockwave, 1 at the moment of a press and decaying to 0.
    *
    * Published by the graph, which owns the decay, and read by the layers that
-   * answer the same press — the embers, the camera kick, the grid flare. One
+   * answer the same press: the embers, the camera kick, the grid flare. One
    * value driving all of them is what makes a click read as a single event
    * rather than as several effects that happen to fire together.
    */

@@ -10,7 +10,7 @@ import { useCallback, useSyncExternalStore } from "react";
  * render every time.
  *
  * The server snapshot is `serverValue`, which callers should set to whichever
- * answer is safe to render first. For a min-width query that means `false` —
+ * answer is safe to render first. For a min-width query that means `false`:
  * mobile-first, so the simpler layout is what renders before we know.
  */
 export function useMediaQuery(query: string, serverValue = false): boolean {

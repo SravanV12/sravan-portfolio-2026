@@ -109,7 +109,7 @@ function Field() {
  * Watches the frame rate and gives up if the device cannot keep pace.
  *
  * A background is never worth a janky page. Software rendering, an old
- * integrated GPU, a laptop on battery saver — any of them can turn this from
+ * integrated GPU, a laptop on battery saver. Any of them can turn this from
  * atmosphere into a stutter, and none of them announce themselves in advance.
  * The first second is ignored so shader compilation is not mistaken for slow
  * hardware.
@@ -140,7 +140,7 @@ function PerformanceGuard({ onSlow }: { onSlow: () => void }) {
 export type Quality = "high" | "medium" | "low";
 
 /**
- * Resolution per tier. Rendered well below device pixel ratio throughout —
+ * Resolution per tier. Rendered well below device pixel ratio throughout:
  * this is a soft, out-of-focus field, so full retina resolution costs several
  * times as much to produce a picture nobody can tell apart. Phones get the
  * lowest setting, which is what makes running it there affordable at all.
@@ -180,7 +180,7 @@ const SPARKS: Record<Quality, number> = {
  * The grid floor and the lens are on everywhere: the floor is what gives the
  * scene a sense of depth at all, and the lens is a single quad whose vignette
  * makes the type over it easier to read, not harder. What the lower tiers lose
- * is the second grid plane, the embers and the pointer wiring — the parts that
+ * is the second grid plane, the embers and the pointer wiring, the parts that
  * are pure ornament, and the parts that cost either another full-screen
  * additive pass or per-frame work on the main thread.
  */
