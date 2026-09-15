@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContactForm } from "@/components/contact-form";
 import { Container } from "@/components/container";
 import { EducationList } from "@/components/education-list";
 import { KineticText } from "@/components/kinetic-text";
@@ -160,8 +161,9 @@ export default async function HomePage() {
         </Container>
       ) : null}
 
-      {/* Contact. No form: it would need a backend and spam handling for
-          nothing an email link does not already do. */}
+      {/* Contact. The form posts to an endpoint that sends the message on by
+          email, with the visitor's address as the reply-to, so answering is
+          one keystroke. The direct links stay underneath it. */}
       <Container
         as="footer"
         id="contact"
@@ -175,19 +177,42 @@ export default async function HomePage() {
           />
 
           <Reveal variant="slide-up" duration={DURATION.slow} className="lg:col-span-9">
-            {profile?.email ? (
-              // An email has no spaces to break at, so it is sized to fit its
-              // column rather than left to split mid-word. `anywhere` is the
-              // safety net, not the plan.
-              <a
-                href={`mailto:${profile.email}`}
-                className="text-h3 sm:text-h2 hover:text-accent inline-block wrap-anywhere transition-colors"
-              >
-                {profile.email}
-              </a>
-            ) : null}
+            <p className="text-h3 max-w-[26ch] text-balance">
+              Have something you would like to build, or a role you think fits?
+              Send me a message.
+            </p>
 
-            <ul className="text-mono mt-16 flex flex-wrap gap-x-10 gap-y-4 uppercase">
+            <div className="mt-12">
+              {/*
+                The form needs script to submit, so with script off it is hidden
+                rather than left sitting there looking usable. The direct links
+                below are the route in that case, which is the reason they were
+                kept rather than replaced.
+              */}
+              <noscript>
+                <style>{`.contact-form{display:none}`}</style>
+                <p className="text-body text-muted max-w-[42ch]">
+                  The message form needs JavaScript. Email or LinkedIn below
+                  both reach me just as well.
+                </p>
+              </noscript>
+              <ContactForm />
+            </div>
+
+            {/* The direct routes stay. Some readers would rather not use a
+                form, and a form that is the only way through is a dead end if
+                it ever breaks. */}
+            <ul className="border-line text-mono mt-16 flex flex-wrap gap-x-10 gap-y-4 border-t pt-10 uppercase">
+              {profile?.email ? (
+                <li>
+                  <a
+                    href={`mailto:${profile.email}`}
+                    className="border-line hover:border-accent hover:text-accent inline-block border-b pt-3 pb-1 wrap-anywhere transition-colors"
+                  >
+                    {profile.email}
+                  </a>
+                </li>
+              ) : null}
               {profile?.linkedin ? (
                 <li>
                   <a

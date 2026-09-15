@@ -336,3 +336,93 @@
     transition: none;
   }
 }
+
+/*
+  Contact form.
+
+  Underlined fields rather than boxes. The rest of the page is ruled lines and
+  open space, and a set of bordered boxes would be the only panelled thing on
+  it. The accent appears only on focus, which is the one moment it carries
+  information.
+
+  Not in a layer, for the same reason the diagram rules are not: these style
+  elements that also carry Tailwind utilities, and layer order beats
+  specificity regardless of how the selector is written.
+*/
+.contact-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0 0.75rem;
+  color: var(--color-fg);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  border-radius: 0;
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: 1.5;
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+textarea.contact-input {
+  resize: vertical;
+  min-height: 7.5rem;
+}
+
+.contact-input:hover:not(:disabled) {
+  border-bottom-color: color-mix(in oklab, var(--color-fg) 35%, transparent);
+}
+
+/*
+  The global focus ring is an outline offset from the element, which around a
+  full-width field draws a box the design does not otherwise have. The field
+  states its focus with its own underline instead.
+*/
+.contact-input:focus-visible {
+  outline: none;
+  border-bottom-color: var(--color-accent);
+  background-color: color-mix(in oklab, var(--color-fg) 3%, transparent);
+}
+
+.contact-input[aria-invalid="true"] {
+  border-bottom-color: var(--color-accent);
+}
+
+.contact-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Autofill paints its own background and near-black text over a dark ground. */
+.contact-input:-webkit-autofill,
+.contact-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-fg);
+  -webkit-box-shadow: 0 0 0 100px var(--color-bg) inset;
+  caret-color: var(--color-fg);
+}
+
+.contact-input::placeholder {
+  color: color-mix(in oklab, var(--color-muted) 70%, transparent);
+}
+
+/*
+  Honeypot. Positioned away rather than hidden with `display: none`, which is
+  the first thing a form-filling bot tests for.
+*/
+.contact-trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-input {
+    transition: none;
+  }
+}
