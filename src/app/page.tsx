@@ -24,9 +24,16 @@ export default async function HomePage() {
 
   // Read on the server and never sent to the browser: this is whether the mail
   // provider is configured, not what it is configured with.
-  const contactReady = Boolean(
+  const mailConfigured = Boolean(
     process.env.RESEND_API_KEY && process.env.CONTACT_TO_EMAIL,
   );
+
+  // Hidden only where a broken form would cost a real visitor their message.
+  // In development it always renders, because hiding it there means whoever is
+  // building the page cannot see the thing they are building, and a submission
+  // that fails with a clear error is far more useful to them than an absence
+  // they have to go and diagnose.
+  const contactReady = mailConfigured || process.env.NODE_ENV !== "production";
 
   return (
     <main id="main" className="flex flex-col">
