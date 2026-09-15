@@ -22,6 +22,12 @@ export default async function HomePage() {
     sanityFetch<CaseStudyCard[]>(CASE_STUDIES_QUERY),
   ]);
 
+  // Read on the server and never sent to the browser: this is whether the mail
+  // provider is configured, not what it is configured with.
+  const contactReady = Boolean(
+    process.env.RESEND_API_KEY && process.env.CONTACT_TO_EMAIL,
+  );
+
   return (
     <main id="main" className="flex flex-col">
       {/* Hero. Type carries this; there is nothing else in it. */}
@@ -179,25 +185,34 @@ export default async function HomePage() {
           <Reveal variant="slide-up" duration={DURATION.slow} className="lg:col-span-9">
             <p className="text-h3 max-w-[26ch] text-balance">
               Have something you would like to build, or a role you think fits?
-              Send me a message.
+              {contactReady ? " Send me a message." : " Get in touch."}
             </p>
 
-            <div className="mt-12">
-              {/*
-                The form needs script to submit, so with script off it is hidden
-                rather than left sitting there looking usable. The direct links
-                below are the route in that case, which is the reason they were
-                kept rather than replaced.
-              */}
-              <noscript>
-                <style>{`.contact-form{display:none}`}</style>
-                <p className="text-body text-muted max-w-[42ch]">
-                  The message form needs JavaScript. Email or LinkedIn below
-                  both reach me just as well.
-                </p>
-              </noscript>
-              <ContactForm />
-            </div>
+            {/*
+              Only shown once the endpoint has somewhere to send to. A form that
+              is certain to fail is worse than no form: it costs the reader their
+              message and their time, and the direct links below do the job. The
+              same reasoning as the education section, which stays hidden until
+              there is something in it.
+            */}
+            {contactReady ? (
+              <div className="mt-12">
+                {/*
+                  The form needs script to submit, so with script off it is
+                  hidden rather than left sitting there looking usable. The
+                  direct links below are the route in that case, which is the
+                  reason they were kept rather than replaced.
+                */}
+                <noscript>
+                  <style>{`.contact-form{display:none}`}</style>
+                  <p className="text-body text-muted max-w-[42ch]">
+                    The message form needs JavaScript. Email or LinkedIn below
+                    both reach me just as well.
+                  </p>
+                </noscript>
+                <ContactForm />
+              </div>
+            ) : null}
 
             {/* The direct routes stay. Some readers would rather not use a
                 form, and a form that is the only way through is a dead end if
