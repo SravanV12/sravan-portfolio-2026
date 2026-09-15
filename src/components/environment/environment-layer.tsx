@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { SceneBoundary } from "@/components/environment/scene-boundary";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { scrollState } from "@/lib/scroll-state";
@@ -208,10 +209,10 @@ export function EnvironmentLayer() {
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-0 select-none"
     >
-      <Scene
-        quality={tier}
-        onSlow={() => setTooSlow(true)}
-      />
+      {/* A crash in here drops the background and nothing else. */}
+      <SceneBoundary>
+        <Scene quality={tier} onSlow={() => setTooSlow(true)} />
+      </SceneBoundary>
     </div>
   );
 }

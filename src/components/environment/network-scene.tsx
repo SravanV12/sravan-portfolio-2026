@@ -402,7 +402,7 @@ export function NetworkScene({
     // table, so the system is never placed by two different rules.
     <group
       ref={groupRef}
-      position={[SECTION_FRAMING[0].x, 0, SECTION_FRAMING[0].z]}
+      position={[DEFAULT_FRAMING.x, 0, DEFAULT_FRAMING.z]}
     >
       <instancedMesh
         ref={nodesRef}
